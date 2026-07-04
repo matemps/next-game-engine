@@ -1,0 +1,9 @@
+[submodule "extern/EASTL"]
+	path = extern/EASTL
+	url = https://github.com/electronicarts/EASTL
+[submodule "scratch/extern/EASTL"]
+	path = scratch/extern/EASTL
+	url = https://github.com/electronicarts/EASTL
+[submodule "scratch/extern/box3d"]
+	path = scratch/extern/box3d
+	url = https://github.com/erincatto/box3d
