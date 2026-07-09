@@ -1,4 +1,5 @@
 #include "Win32Window.h"
+#include "../../input/Input.h"
 
 #include <stdexcept>
 
@@ -90,14 +91,26 @@ LRESULT CALLBACK Win32Window::WindowProc(
 {
      switch (uMsg)
      {
-     case WM_DESTROY:
-     {
-          PostQuitMessage(0);
-          return 0;
-     }
-     case WM_CLOSE:
-          DestroyWindow(hwnd);
-          return 0;
+          case WM_DESTROY:
+          {
+               PostQuitMessage(0);
+               return 0;
+          }
+          case WM_CLOSE:
+          {
+               DestroyWindow(hwnd);
+               return 0;
+          }
+          case WM_KEYDOWN:
+          {
+               Input::SetKeyDown(wParam);
+               return 0;
+          }
+          case WM_KEYUP:
+          {
+               Input::SetKeyUp(wParam);
+               return 0;
+          }
      }
 
      return DefWindowProcW(

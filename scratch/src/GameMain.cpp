@@ -16,7 +16,7 @@ class Scratch : public Game
             std::cout << "Game initialized." << std::endl;
         }
         
-        void Update() override {}
+        void Update(float dt) override {}
 
         void Shutdown() override
         {
