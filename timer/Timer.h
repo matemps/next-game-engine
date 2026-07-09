@@ -1,6 +1,6 @@
 #pragma once
 
-#include <chrono>   // to do: replace with eastl implementation
+#include "../extern/EASTL/include/EASTL/chrono.h"
 
 
 class Timer
@@ -18,7 +18,7 @@ class Timer
         inline float GetDeltaTime() const { return m_DeltaTime; }
 
     private:
-        using Clock = std::chrono::steady_clock;    // to do: replace with eastl implementation
+        using Clock = eastl::chrono::steady_clock;
 
         Clock::time_point m_LastTime;
 

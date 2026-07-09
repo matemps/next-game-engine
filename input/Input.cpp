@@ -1,7 +1,8 @@
 #include "Input.h"
+#include "../extern/EASTL/include/EASTL/array.h"
 
 
-std::array<bool, 256> Input::s_Keys = {};   // to do: replace with eastl implementation
+eastl::array<bool, 256> Input::s_Keys = {};
 
 
 void Input::Initialize()

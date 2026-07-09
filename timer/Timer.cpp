@@ -1,5 +1,5 @@
 #include "Timer.h"
-
+#include "../extern/EASTL/include/EASTL/chrono.h"
 
 // constructor
 Timer::Timer()
@@ -12,8 +12,7 @@ void Timer::Tick()
 {
     auto current = Clock::now();
 
-    // to do: replace with eastl implementation
-    m_DeltaTime = std::chrono::duration<float>(current - m_LastTime).count();
+    m_DeltaTime = eastl::chrono::duration<float>(current - m_LastTime).count();
 
     m_LastTime = current;
 }

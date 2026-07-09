@@ -1,7 +1,8 @@
 #pragma once
 
 #include <Windows.h>
-#include <array>    // to do: replace with eastl implementation
+
+#include "../extern/EASTL/include/EASTL/array.h"
 
 
 // Input handler
@@ -16,5 +17,5 @@ class Input
         static bool IsKeyDown(int key);
 
     private:
-        static std::array<bool, 256> s_Keys;    // to do: replace with eastl implementation
+        static eastl::array<bool, 256> s_Keys;
 };
