@@ -1,4 +1,5 @@
 add_executable(launcher WIN32
+    ../common/EASTLNew.cpp
     src/main.cpp
     ../app/src/Application.cpp
     ../app/src/Win32Window.cpp
@@ -9,7 +10,8 @@ target_include_directories(launcher PRIVATE
     ../public/game
 )
 
+target_link_libraries(launcher PRIVATE EASTL)
+
 target_compile_definitions(launcher PRIVATE UNICODE _UNICODE)
 
-# launcher builds the game DLL so it's present next to the exe.
 add_dependencies(launcher scratch)
