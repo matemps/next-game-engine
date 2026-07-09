@@ -1,5 +1,6 @@
 #include "Timer.h"
-#include "../extern/EASTL/include/EASTL/chrono.h"
+#include <EASTL/chrono.h>
+
 
 // constructor
 Timer::Timer()

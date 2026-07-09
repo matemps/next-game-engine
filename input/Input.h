@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-#include "../extern/EASTL/include/EASTL/array.h"
+#include <EASTL/array.h>
 
 
 // Input handler

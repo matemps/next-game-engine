@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../extern/EASTL/include/EASTL/chrono.h"
+#include <EASTL/chrono.h>
 
 
 class Timer
