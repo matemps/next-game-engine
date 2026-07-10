@@ -27,7 +27,13 @@ class Game
 
         virtual void Init() = 0;
         virtual void Update(float dt) = 0;
+        virtual void Render() = 0;
         virtual void Shutdown() = 0;
+
+        virtual void OnActivated() = 0;
+        virtual void OnDeactivated() = 0;
+        virtual void OnSuspending() = 0;
+        virtual void OnResuming() = 0;
 
 
     public:

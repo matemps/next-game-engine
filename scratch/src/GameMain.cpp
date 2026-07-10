@@ -18,10 +18,18 @@ class Scratch : public Game
         
         void Update(float dt) override {}
 
+        void Render() override {}
+
         void Shutdown() override
         {
             std::cout << "Game shutting down." << std::endl;
         }
+
+
+        void OnActivated() override {}
+        void OnDeactivated() override {}
+        void OnSuspending() override {}
+        void OnResuming() override {}
 };
 
 EXPORT_GAME(Scratch);

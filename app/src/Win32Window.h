@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Windows.h>
+#include <functional>
 
 
 class Win32Window
@@ -22,6 +23,15 @@ public:
      // member functions
 
      bool ProcessMessages();
+
+     void SetRunFn(std::function<void()> callback);
+     void SetOnDisplayChangeFn(std::function<void()> callback);
+     void SetOnWindowMovedFn(std::function<void()> callback);
+     void SetOnActivatedFn(std::function<void()> callback);
+     void SetOnDeactivatedFn(std::function<void()> callback);
+     void SetOnSuspendingFn(std::function<void()> callback);
+     void SetOnResumingFn(std::function<void()> callback);
+     void SetOnResizeFn(std::function<void(int, int)> callback);
 
 public:
      // inline functions
@@ -48,4 +58,19 @@ private:
 
      int m_Width = 0;
      int m_Height = 0;
+
+     std::function<void()> RunFn;
+     std::function<void()> OnDisplayChangeFn;
+     std::function<void()> OnWindowMovedFn;
+     std::function<void()> OnActivatedFn;
+     std::function<void()> OnDeactivatedFn;
+     std::function<void()> OnSuspendingFn;
+     std::function<void()> OnResumingFn;
+     std::function<void(int, int)> OnResizeFn;
+
+     bool m_in_sizemove = false;
+     bool m_in_suspend = false;
+     bool m_minimized = false;
+     bool m_fullscreen = false;
+     // Set m_fullscreen to true if defaulting to fullscreen.
 };
