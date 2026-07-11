@@ -5,9 +5,6 @@ project(next-game-engine VERSION 0.1.0 LANGUAGES C CXX)
 # find game.dll next to itself at runtime without a post-build copy step.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# directx toolkit
-add_subdirectory(extern/DirectXTK)
-
 # launcher
 add_subdirectory(launcher)
 

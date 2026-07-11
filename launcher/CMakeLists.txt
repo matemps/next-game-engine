@@ -13,7 +13,7 @@ target_include_directories(launcher PRIVATE
     ../timer
 )
 
-target_link_libraries(launcher PRIVATE DirectXTK d3d11.lib dxgi.lib dxguid.lib)
+target_link_libraries(launcher PRIVATE d3d11.lib dxgi.lib dxguid.lib)
 
 target_compile_definitions(launcher PRIVATE UNICODE _UNICODE)
 

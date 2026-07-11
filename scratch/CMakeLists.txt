@@ -5,11 +5,10 @@ add_library(scratch SHARED
 target_include_directories(scratch PUBLIC
     src
     ${CMAKE_CURRENT_SOURCE_DIR}/game
-    extern/DirectXTK/Inc
     ${CMAKE_CURRENT_SOURCE_DIR}/extern/box3d/include/box3d
 )
 
-target_link_libraries(scratch PUBLIC DirectXTK d3d11.lib dxgi.lib dxguid.lib)
+target_link_libraries(scratch PUBLIC d3d11.lib dxgi.lib dxguid.lib)
 
 target_compile_definitions(scratch PRIVATE GAME_EXPORTS)
 
