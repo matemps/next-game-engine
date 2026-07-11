@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-#include <EASTL/array.h>
+#include <array>
 
 
 // Input handler
@@ -17,5 +17,5 @@ class Input
         static bool IsKeyDown(int key);
 
     private:
-        static eastl::array<bool, 256> s_Keys;
+        static std::array<bool, 256> s_Keys;
 };

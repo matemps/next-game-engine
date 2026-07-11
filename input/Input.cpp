@@ -1,7 +1,7 @@
 #include "Input.h"
-#include <EASTL/array.h>
+#include <array>
 
-eastl::array<bool, 256> Input::s_Keys = {};
+std::array<bool, 256> Input::s_Keys = {};
 
 
 void Input::Initialize()
