@@ -24,7 +24,7 @@ public:
 
      bool ProcessMessages();
 
-     void SetRunFn(std::function<void()> callback);
+     void SetTickFn(std::function<void()> callback);
      void SetOnDisplayChangeFn(std::function<void()> callback);
      void SetOnWindowMovedFn(std::function<void()> callback);
      void SetOnActivatedFn(std::function<void()> callback);
@@ -59,7 +59,7 @@ private:
      int m_Width = 0;
      int m_Height = 0;
 
-     std::function<void()> RunFn;
+     std::function<void()> TickFn;
      std::function<void()> OnDisplayChangeFn;
      std::function<void()> OnWindowMovedFn;
      std::function<void()> OnActivatedFn;

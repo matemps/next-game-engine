@@ -29,7 +29,7 @@ Application::Application(Game* game) : m_Game(game)
     CreateWindowSizeDependentResources();
 
 
-    m_Window->SetRunFn([this]()
+    m_Window->SetTickFn([this]()
     {
         Tick();
     });

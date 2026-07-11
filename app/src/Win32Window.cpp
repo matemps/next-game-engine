@@ -1,7 +1,11 @@
 #include "Win32Window.h"
-#include "../../input/Input.h"
-
+#include <d3d11.h>
+#include <dxgi1_6.h>
+#include "Keyboard.h"
 #include <stdexcept>
+
+
+using namespace DirectX;
 
 
 // constructor
@@ -82,9 +86,9 @@ bool Win32Window::ProcessMessages()
 }
 
 
-void Win32Window::SetRunFn(std::function<void()> callback)
+void Win32Window::SetTickFn(std::function<void()> callback)
 {
-     RunFn = std::move(callback);
+     TickFn = std::move(callback);
 }
 void Win32Window::SetOnDisplayChangeFn(std::function<void()> callback)
 {
@@ -143,9 +147,9 @@ LRESULT CALLBACK Win32Window::WindowProc(
           {
                case WM_PAINT:
                {
-                    if (window->m_in_sizemove && window->RunFn)
+                    if (window->m_in_sizemove && window->TickFn)
                     {
-                         window->RunFn();
+                         window->TickFn();
                     }
                     else
                     {
@@ -267,14 +271,22 @@ LRESULT CALLBACK Win32Window::WindowProc(
 
                case WM_KEYDOWN:
                {
-                    Input::SetKeyDown(wParam);
-                    return 0;
                }
 
                case WM_KEYUP:
                {
-                    Input::SetKeyUp(wParam);
-                    return 0;
+               }
+
+               case WM_SYSKEYUP:
+               {
+                    Keyboard::ProcessMessage(uMsg, wParam, lParam);
+                    break;
+               }
+
+               case WM_SYSKEYDOWN:
+               {
+                    Keyboard::ProcessMessage(uMsg, wParam, lParam);
+                    break;
                }
 
                case WM_SIZE:
