@@ -9,6 +9,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 add_subdirectory(extern/EASTL)
 
+# directx toolkit
+add_subdirectory(extern/DirectXTK)
+
 # launcher
 add_subdirectory(launcher)
 
