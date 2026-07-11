@@ -4,7 +4,7 @@ add_library(scratch SHARED
 
 target_include_directories(scratch PUBLIC
     src
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/game
+    ${CMAKE_CURRENT_SOURCE_DIR}/game
     extern/DirectXTK/Inc
     ${CMAKE_CURRENT_SOURCE_DIR}/extern/box3d/include/box3d
 )
