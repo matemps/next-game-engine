@@ -1,11 +1,6 @@
 #include "Win32Window.h"
-#include <d3d11.h>
-#include <dxgi1_6.h>
-#include "Keyboard.h"
+#include "../../input/Input.h"
 #include <stdexcept>
-
-
-using namespace DirectX;
 
 
 // constructor
@@ -271,22 +266,21 @@ LRESULT CALLBACK Win32Window::WindowProc(
 
                case WM_KEYDOWN:
                {
+                    Input::SetKeyDown(wParam);
+                    return 0;
                }
-
                case WM_KEYUP:
                {
+                    Input::SetKeyUp(wParam);
+                    return 0;
                }
 
                case WM_SYSKEYUP:
                {
-                    Keyboard::ProcessMessage(uMsg, wParam, lParam);
-                    break;
                }
 
                case WM_SYSKEYDOWN:
                {
-                    Keyboard::ProcessMessage(uMsg, wParam, lParam);
-                    break;
                }
 
                case WM_SIZE:
