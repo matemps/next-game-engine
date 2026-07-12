@@ -1,5 +1,5 @@
 #include "Win32Window.h"
-#include "../../input/Input.h"
+#include "Keyboard.h"
 #include <stdexcept>
 
 
@@ -266,21 +266,21 @@ LRESULT CALLBACK Win32Window::WindowProc(
 
                case WM_KEYDOWN:
                {
-                    Input::SetKeyDown(wParam);
-                    return 0;
                }
                case WM_KEYUP:
                {
-                    Input::SetKeyUp(wParam);
-                    return 0;
                }
 
                case WM_SYSKEYUP:
                {
+                    DirectX::Keyboard::ProcessMessage(uMsg, wParam, lParam);
+                    break;
                }
 
                case WM_SYSKEYDOWN:
                {
+                    DirectX::Keyboard::ProcessMessage(uMsg, wParam, lParam);
+                    break;
                }
 
                case WM_SIZE:

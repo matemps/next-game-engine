@@ -4,6 +4,7 @@
 #include "Win32Window.h"
 #include "../../graphics/DeviceResources.h"
 #include "../../timer/StepTimer.h"
+#include "Keyboard.h"
 
 
 class Application : public DX::IDeviceNotify
@@ -53,4 +54,5 @@ class Application : public DX::IDeviceNotify
         Win32Window* m_Window = nullptr;
         DX::DeviceResources* m_DeviceResources = nullptr;
         StepTimer m_Timer = StepTimer();
+        std::unique_ptr<DirectX::Keyboard> m_keyboard;
 };

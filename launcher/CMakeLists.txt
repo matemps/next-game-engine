@@ -2,7 +2,6 @@ add_executable(launcher WIN32
     src/main.cpp
     ../app/src/Application.cpp
     ../app/src/Win32Window.cpp
-    ../input/Input.cpp
     ../graphics/DeviceResources.cpp
 )
 

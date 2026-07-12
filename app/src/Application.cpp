@@ -3,7 +3,7 @@
 #include "Application.h"
 #include "Win32Window.h"
 #include "Game.h"
-#include "../../input/Input.h"
+#include "Keyboard.h"
 #include "../../timer/StepTimer.h"
 
 
@@ -63,7 +63,8 @@ Application::Application(Game* game) : m_Game(game)
     });
 
 
-    Input::Initialize();    // init input
+    m_keyboard = std::make_unique<Keyboard>();  // init input
+
     game->Init();   // init game
 }
 
