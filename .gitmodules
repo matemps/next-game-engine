@@ -1,3 +1,6 @@
-[submodule "scratch/extern/box3d"]
-	path = scratch/extern/box3d
+[submodule "extern/DirectXTK"]
+	path = extern/DirectXTK
+	url = https://github.com/matemps/DirectXTK
+[submodule "extern/box3d"]
+	path = extern/box3d
 	url = https://github.com/erincatto/box3d
