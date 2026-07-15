@@ -7,14 +7,6 @@
 class Win32Window
 {
 public:
-     // constructor
-
-     Win32Window(
-          const wchar_t* title,
-          int width,
-          int height
-     );
-
      // destructor
 
      ~Win32Window();
@@ -22,7 +14,18 @@ public:
 public:
      // member functions
 
+     void Init(const wchar_t* title, int width, int height);
      bool ProcessMessages();
+
+public:
+     // inline functions
+
+     inline HWND GetHWND() const { return m_HWND; }
+     inline int GetWidth() const { return m_Width; }
+     inline int GetHeight() const { return m_Height; }
+
+public:
+     // setters
 
      void SetTickFn(std::function<void()> callback);
      void SetOnDisplayChangeFn(std::function<void()> callback);
@@ -33,14 +36,6 @@ public:
      void SetOnResumingFn(std::function<void()> callback);
      void SetOnResizeFn(std::function<void(int, int)> callback);
 
-public:
-     // inline functions
-
-     inline HWND GetHWND() const { return m_HWND; }
-     inline int GetWidth() const { return m_Width; }
-     inline int GetHeight() const { return m_Height; }
-
-
 private:
      static LRESULT CALLBACK WindowProc(
           HWND hwnd,
@@ -48,6 +43,16 @@ private:
           WPARAM wParam,
           LPARAM lParam
      );
+
+private:
+     std::function<void()> TickFn = nullptr;
+     std::function<void()> OnDisplayChangeFn = nullptr;
+     std::function<void()> OnWindowMovedFn = nullptr;
+     std::function<void()> OnActivatedFn = nullptr;
+     std::function<void()> OnDeactivatedFn = nullptr;
+     std::function<void()> OnSuspendingFn = nullptr;
+     std::function<void()> OnResumingFn = nullptr;
+     std::function<void(int, int)> OnResizeFn = nullptr;
 
 private:
      HWND m_HWND = nullptr;
@@ -58,15 +63,6 @@ private:
 
      int m_Width = 0;
      int m_Height = 0;
-
-     std::function<void()> TickFn;
-     std::function<void()> OnDisplayChangeFn;
-     std::function<void()> OnWindowMovedFn;
-     std::function<void()> OnActivatedFn;
-     std::function<void()> OnDeactivatedFn;
-     std::function<void()> OnSuspendingFn;
-     std::function<void()> OnResumingFn;
-     std::function<void(int, int)> OnResizeFn;
 
      bool m_in_sizemove = false;
      bool m_in_suspend = false;

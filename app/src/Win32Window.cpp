@@ -3,16 +3,16 @@
 #include <stdexcept>
 
 
-// constructor
-Win32Window::Win32Window(
+void Win32Window::Init(
      const wchar_t* title,
      int width,
      int height
-) :
-     m_Title(title),
-     m_Width(width),
-     m_Height(height)
+)
 {
+     m_Title = title;
+     m_Width = width;
+     m_Height = height;
+
      m_HInstance = GetModuleHandleW(nullptr);
 
      WNDCLASSEXW wc = {};
@@ -44,8 +44,14 @@ Win32Window::Win32Window(
           nullptr,
           nullptr,
           m_HInstance,
+
+          // pass pointer of this win32window instance to lpParam.
           this
      );
+
+     // When the window procedure handles the WM_NCCREATE or WM_CREATE message,
+     // it will extract our win32window instance pointer from the message data.
+
 
      if (!m_HWND)
      {
@@ -81,37 +87,39 @@ bool Win32Window::ProcessMessages()
 }
 
 
+// setters
+
 void Win32Window::SetTickFn(std::function<void()> callback)
 {
-     TickFn = std::move(callback);
+     TickFn = callback;
 }
 void Win32Window::SetOnDisplayChangeFn(std::function<void()> callback)
 {
-     OnDisplayChangeFn = std::move(callback);
+     OnDisplayChangeFn = callback;
 }
 void Win32Window::SetOnWindowMovedFn(std::function<void()> callback)
 {
-     OnWindowMovedFn = std::move(callback);
+     OnWindowMovedFn = callback;
 }
 void Win32Window::SetOnActivatedFn(std::function<void()> callback)
 {
-     OnActivatedFn = std::move(callback);
+     OnActivatedFn = callback;
 }
 void Win32Window::SetOnDeactivatedFn(std::function<void()> callback)
 {
-     OnDeactivatedFn = std::move(callback);
+     OnDeactivatedFn = callback;
 }
 void Win32Window::SetOnSuspendingFn(std::function<void()> callback)
 {
-     OnSuspendingFn = std::move(callback);
+     OnSuspendingFn = callback;
 }
 void Win32Window::SetOnResumingFn(std::function<void()> callback)
 {
-     OnResumingFn = std::move(callback);
+     OnResumingFn = callback;
 }
 void Win32Window::SetOnResizeFn(std::function<void(int, int)> callback)
 {
-     OnResizeFn = std::move(callback);
+     OnResizeFn = callback;
 }
 
 
@@ -122,29 +130,37 @@ LRESULT CALLBACK Win32Window::WindowProc(
      LPARAM lParam
 )
 {
-     Win32Window* window = nullptr;
+     Win32Window* pWindow = nullptr;
 
+     // CreateWindowsEx function sends WM_NCCREATE message.
      if (uMsg == WM_NCCREATE)
      {
-          auto createStruct = reinterpret_cast<CREATESTRUCTW*>(lParam);
-          window = static_cast<Win32Window*>(createStruct->lpCreateParams);
+          // Extract the CREATESTRUCTW structure from lParam.
+          CREATESTRUCTW *pCreate = reinterpret_cast<CREATESTRUCTW*>(lParam);
 
-          SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
+          // Retrieve pointer to this Win32Window instance.
+          pWindow = reinterpret_cast<Win32Window*>(pCreate->lpCreateParams);
+
+          // Store the pointer in the instance data for the window.
+          SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)pWindow);
      }
      else
      {
-          window = reinterpret_cast<Win32Window*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+          // Retrieve the stored pointer.
+
+          LONG_PTR ptr = GetWindowLongPtrW(hwnd, GWLP_USERDATA);
+          pWindow = reinterpret_cast<Win32Window*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
      }
 
-     if (window)
+     if (pWindow)
      {
           switch (uMsg)
           {
                case WM_PAINT:
                {
-                    if (window->m_in_sizemove && window->TickFn)
+                    if (pWindow->m_in_sizemove && pWindow->TickFn)
                     {
-                         window->TickFn();
+                         pWindow->TickFn();
                     }
                     else
                     {
@@ -158,38 +174,38 @@ LRESULT CALLBACK Win32Window::WindowProc(
 
                case WM_DISPLAYCHANGE:
                {
-                    if (window->OnDisplayChangeFn)
+                    if (pWindow->OnDisplayChangeFn)
                     {
-                         window->OnDisplayChangeFn();
+                         pWindow->OnDisplayChangeFn();
                     }
                     break;
                }
 
                case WM_MOVE:
                {
-                    if (window->OnWindowMovedFn)
+                    if (pWindow->OnWindowMovedFn)
                     {
-                         window->OnWindowMovedFn();
+                         pWindow->OnWindowMovedFn();
                     }
                     break;
                }
 
                case WM_ENTERSIZEMOVE:
                {
-                    window->m_in_sizemove = true;
+                    pWindow->m_in_sizemove = true;
                     break;
                }
 
                case WM_EXITSIZEMOVE:
                {
-                    window->m_in_sizemove = false;
+                    pWindow->m_in_sizemove = false;
 
-                    if (window->OnResizeFn)
+                    if (pWindow->OnResizeFn)
                     {
                          RECT rc;
                          GetClientRect(hwnd, &rc);
 
-                         window->OnResizeFn(rc.right - rc.left, rc.bottom - rc.top);
+                         pWindow->OnResizeFn(rc.right - rc.left, rc.bottom - rc.top);
                     }
                     break;
                }
@@ -207,13 +223,13 @@ LRESULT CALLBACK Win32Window::WindowProc(
 
                case WM_ACTIVATEAPP:
                {
-                    if (wParam && window->OnActivatedFn)
+                    if (wParam && pWindow->OnActivatedFn)
                     {
-                         window->OnActivatedFn();
+                         pWindow->OnActivatedFn();
                     }
-                    else if (window->OnDeactivatedFn)
+                    else if (pWindow->OnDeactivatedFn)
                     {
-                         window->OnDeactivatedFn();
+                         pWindow->OnDeactivatedFn();
                     }
 
                     break;
@@ -225,21 +241,21 @@ LRESULT CALLBACK Win32Window::WindowProc(
                     {
                          case PBT_APMQUERYSUSPEND:
                          {
-                              if (!window->m_in_suspend && window->OnSuspendingFn)
-                                   window->OnSuspendingFn();
+                              if (!pWindow->m_in_suspend && pWindow->OnSuspendingFn)
+                                   pWindow->OnSuspendingFn();
 
-                              window->m_in_suspend = true;
+                              pWindow->m_in_suspend = true;
                               return TRUE;
                          }
 
                          case PBT_APMRESUMESUSPEND:
                          {
-                              if (!window->m_minimized)
+                              if (!pWindow->m_minimized)
                               {
-                                   if (window->m_in_suspend && window->OnResumingFn)
-                                        window->OnResumingFn();
+                                   if (pWindow->m_in_suspend && pWindow->OnResumingFn)
+                                        pWindow->OnResumingFn();
 
-                                   window->m_in_suspend = false;
+                                   pWindow->m_in_suspend = false;
                               }
 
                               return TRUE;
@@ -287,29 +303,29 @@ LRESULT CALLBACK Win32Window::WindowProc(
                {
                     if (wParam == SIZE_MINIMIZED)
                     {
-                         if (!window->m_minimized)
+                         if (!pWindow->m_minimized)
                          {
-                              window->m_minimized = true;
+                              pWindow->m_minimized = true;
 
-                              if (!window->m_in_suspend && window->OnSuspendingFn)
-                                   window->OnSuspendingFn();
+                              if (!pWindow->m_in_suspend && pWindow->OnSuspendingFn)
+                                   pWindow->OnSuspendingFn();
 
-                              window->m_in_suspend = true;
+                              pWindow->m_in_suspend = true;
                          }
                     }
-                    else if (window->m_minimized)
+                    else if (pWindow->m_minimized)
                     {
-                         window->m_minimized = false;
+                         pWindow->m_minimized = false;
 
-                         if (window->m_in_suspend && window->OnResumingFn)
-                              window->OnResumingFn();
+                         if (pWindow->m_in_suspend && pWindow->OnResumingFn)
+                              pWindow->OnResumingFn();
 
-                         window->m_in_suspend = false;
+                         pWindow->m_in_suspend = false;
                     }
-                    else if (!window->m_in_sizemove)
+                    else if (!pWindow->m_in_sizemove)
                     {
-                         if (window->OnResizeFn)
-                              window->OnResizeFn(window->m_Width, window->m_Height);
+                         if (pWindow->OnResizeFn)
+                              pWindow->OnResizeFn(pWindow->m_Width, pWindow->m_Height);
                     }
 
                     break;

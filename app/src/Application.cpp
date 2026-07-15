@@ -19,7 +19,8 @@ Application::Application(Game* game) : m_Game(game)
     int width = game->GetWidth();
     int height = game->GetHeight();
 
-    m_Window = new Win32Window(wideTitle.c_str(), width, height);
+    m_Window = new Win32Window();
+    m_Window->Init(wideTitle.c_str(), width, height);
 
     m_DeviceResources = new DX::DeviceResources();
     m_DeviceResources->SetWindow(m_Window->GetHWND(), width, height);
@@ -28,40 +29,14 @@ Application::Application(Game* game) : m_Game(game)
     m_DeviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
 
-
-    m_Window->SetTickFn([this]()
-    {
-        Tick();
-    });
-    m_Window->SetOnDisplayChangeFn([this]()
-    {
-        OnDisplayChange();
-    });
-    m_Window->SetOnWindowMovedFn([this]()
-    {
-        OnWindowMoved();
-    });
-    m_Window->SetOnActivatedFn([this]()
-    {
-        OnActivated();
-    });
-    m_Window->SetOnDeactivatedFn([this]()
-    {
-        OnDeactivated();
-    });
-    m_Window->SetOnSuspendingFn([this]()
-    {
-        OnSuspending();
-    });
-    m_Window->SetOnResumingFn([this]()
-    {
-        OnResuming();
-    });
-    m_Window->SetOnResizeFn([this](int w, int h)
-    {
-        OnResize(w, h);
-    });
-
+    m_Window->SetTickFn([this]() { Tick(); });
+    m_Window->SetOnDisplayChangeFn([this]() { OnDisplayChange(); });
+    m_Window->SetOnWindowMovedFn([this]() { OnWindowMoved(); });
+    m_Window->SetOnActivatedFn([this]() { OnActivated(); });
+    m_Window->SetOnDeactivatedFn([this]() { OnDeactivated(); });
+    m_Window->SetOnSuspendingFn([this]() { OnSuspending(); });
+    m_Window->SetOnResumingFn([this]() { OnResuming(); });
+    m_Window->SetOnResizeFn([this](int w, int h) { OnResize(w, h); });
 
     m_keyboard = std::make_unique<Keyboard>();  // init input
 
