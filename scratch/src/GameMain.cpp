@@ -16,7 +16,15 @@ class Scratch : public Game
             std::cout << "Game initialized." << std::endl;
         }
         
-        void Update(float dt) override {}
+        void Update(float dt) override
+        {
+            DirectX::Keyboard::State kbState = GetKeyboard()->GetState();
+
+            if (kbState.W) { std::cout << "Pressed W." << std::endl; }
+            if (kbState.A) { std::cout << "Pressed A." << std::endl; }
+            if (kbState.S) { std::cout << "Pressed S." << std::endl; }
+            if (kbState.D) { std::cout << "Pressed D." << std::endl; }
+        }
 
         void Render() override {}
 

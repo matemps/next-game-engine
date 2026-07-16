@@ -38,8 +38,9 @@ Application::Application(Game* game) : m_Game(game)
     m_Window->SetOnResumingFn([this]() { OnResuming(); });
     m_Window->SetOnResizeFn([this](int w, int h) { OnResize(w, h); });
 
-    m_keyboard = std::make_unique<Keyboard>();  // init input
+    m_keyboard = new Keyboard();  // init input
 
+    game->SetKeyboard(m_keyboard);  // set game keyboard
     game->Init();   // init game
 }
 
