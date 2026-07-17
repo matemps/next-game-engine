@@ -167,7 +167,7 @@ void Application::CreateDeviceDependentResources()
 // Allocate all memory resources that change on a window SizeChanged event.
 void Application::CreateWindowSizeDependentResources()
 {
-    // TODO: Initialize windows-size dependent objects here.
+    m_Game->CreateWindowSizeDependentResources();
 }
 
 void Application::OnDeviceLost()
