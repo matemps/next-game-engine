@@ -55,7 +55,7 @@ class Scratch : public Game
         void OnSuspending() override {}
         void OnResuming() override {}
 
-        // Runs when the window is created and when the window is resized.
+        // Runs when the window is created or when the window is resized.
         void CreateWindowSizeDependentResources() override
         {
             // TO DO: protect against a divide by zero exception
