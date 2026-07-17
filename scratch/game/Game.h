@@ -34,6 +34,8 @@ class Game
         virtual void OnDeactivated() = 0;
         virtual void OnSuspending() = 0;
         virtual void OnResuming() = 0;
+
+        virtual void CreateWindowSizeDependentResources() = 0;
     
     public:
         // inline functions

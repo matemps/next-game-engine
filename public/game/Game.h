@@ -34,6 +34,8 @@ class Game
         virtual void OnDeactivated() = 0;
         virtual void OnSuspending() = 0;
         virtual void OnResuming() = 0;
+
+        virtual void CreateWindowSizeDependentResources() = 0;
     
     public:
         // inline functions
@@ -42,6 +44,7 @@ class Game
         inline std::string GetTitle() const { return m_Title; }
         inline int GetWidth() const { return m_Width; }
         inline int GetHeight() const { return m_Height; }
+        inline DirectX::Keyboard* GetKeyboard() const { return m_Keyboard; }
 
         // setters
         inline void SetKeyboard(DirectX::Keyboard* keyboard) { m_Keyboard = keyboard; }
