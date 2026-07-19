@@ -1,7 +1,10 @@
 #pragma once
 
 #include <string>
+
 #include "Keyboard.h"
+#include "GameRenderer.h"
+
 
 class Game
 {
@@ -45,9 +48,11 @@ class Game
         inline int GetWidth() const { return m_Width; }
         inline int GetHeight() const { return m_Height; }
         inline DirectX::Keyboard* GetKeyboard() const { return m_Keyboard; }
+        inline GameRenderer* GetGameRenderer() const { return m_GameRenderer; }
 
         // setters
         inline void SetKeyboard(DirectX::Keyboard* keyboard) { m_Keyboard = keyboard; }
+        inline void SetGameRenderer(GameRenderer* renderer) { m_GameRenderer = renderer; }
 
     private:
         std::string m_Title = "";
@@ -55,4 +60,5 @@ class Game
         int m_Height = 0;
 
         DirectX::Keyboard* m_Keyboard = nullptr;
+        GameRenderer* m_GameRenderer = nullptr;
 };

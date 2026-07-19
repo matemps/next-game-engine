@@ -8,11 +8,12 @@
 #include <dxgi1_6.h>
 #include <DirectXMath.h>
 #include <DirectXColors.h>
-#include "SimpleMath.h"
+#include "WVP.h"
+
+#include "GameCube.h"
 
 
 using namespace DirectX;
-using namespace DirectX::SimpleMath;
 
 
 class Scratch : public Game
@@ -24,6 +25,28 @@ class Scratch : public Game
         void Init() override
         {
             std::cout << "Game initialized." << std::endl;
+            
+            Vertex vertices[] =
+            {
+                { Vector3(-0.5f, -0.5f, -0.5f), Color(0.0f, 0.0f, 0.0f) },
+                { Vector3(-0.5f, -0.5f,  0.5f), Color(0.0f, 0.0f, 1.0f) },
+                { Vector3(-0.5f,  0.5f, -0.5f), Color(0.0f, 1.0f, 0.0f) },
+                { Vector3(-0.5f,  0.5f,  0.5f), Color(0.0f, 1.0f, 1.0f) },
+                { Vector3( 0.5f, -0.5f, -0.5f), Color(1.0f, 0.0f, 0.0f) },
+                { Vector3( 0.5f, -0.5f,  0.5f), Color(1.0f, 0.0f, 1.0f) },
+                { Vector3( 0.5f,  0.5f, -0.5f), Color(1.0f, 1.0f, 0.0f) },
+                { Vector3( 0.5f,  0.5f,  0.5f), Color(1.0f, 1.0f, 1.0f) },
+            };
+            uint16_t indices[] =
+            {
+                0,2,1, 1,2,3,
+                4,5,6, 5,7,6,
+                0,1,5, 0,5,4,
+                2,6,7, 2,7,3,
+                0,4,6, 0,6,2,
+                1,3,7, 1,7,5,
+            };
+            m_GameCube = new GameCube(vertices, indices);
         }
         
         void Update(float dt) override
@@ -31,7 +54,9 @@ class Scratch : public Game
             Vector3 eye(0.0f, 0.7f, 1.5f);
             Vector3 at(0.0f, -0.1f, 0.0f);
             m_View = Matrix::CreateLookAt(eye, at, Vector3::UnitY);
-            m_World = Matrix::CreateRotationY(dt * XM_PIDIV4);
+
+            m_RotationAngle += dt * XM_PIDIV4;
+            m_World = Matrix::CreateRotationY(m_RotationAngle);
 
 
             Keyboard::State kbState = GetKeyboard()->GetState();
@@ -42,7 +67,10 @@ class Scratch : public Game
             if (kbState.D) { std::cout << "Pressed D." << std::endl; }
         }
 
-        void Render() override {}
+        void Render() override
+        {
+            GetGameRenderer()->DrawCube(m_GameCube, m_World, m_View, m_Projection);
+        }
 
         void Shutdown() override
         {
@@ -59,7 +87,7 @@ class Scratch : public Game
         void CreateWindowSizeDependentResources() override
         {
             // TO DO: protect against a divide by zero exception
-            float aspectRatio = GetWidth() / GetHeight();
+            float aspectRatio = static_cast<float>(GetWidth()) / static_cast<float>(GetHeight());
 
             float fovAngleY = 70.0f * XM_PI / 180.0f;
 
@@ -83,6 +111,10 @@ class Scratch : public Game
         Matrix m_World;
         Matrix m_View;
         Matrix m_Projection;
+
+        GameCube* m_GameCube = nullptr;
+        
+        float m_RotationAngle = 0.0f;
 };
 
 EXPORT_GAME(Scratch);

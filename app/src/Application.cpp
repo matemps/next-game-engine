@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "Win32Window.h"
 #include "Game.h"
+#include "GameRenderer.h"
 #include "Keyboard.h"
 #include "../../timer/StepTimer.h"
 
@@ -38,9 +39,16 @@ Application::Application(Game* game) : m_Game(game)
     m_Window->SetOnResumingFn([this]() { OnResuming(); });
     m_Window->SetOnResizeFn([this](int w, int h) { OnResize(w, h); });
 
-    m_keyboard = new Keyboard();  // init input
+    GameRenderer* gameRenderer = new GameRenderer();
+    gameRenderer->SetDrawCubeFn(([this](const GameCube* gc, Matrix world, Matrix view, Matrix projection)
+    {
+        m_Renderer->DrawCube(gc, world, view, projection);
+    }));    // set draw cube function
+    game->SetGameRenderer(gameRenderer);    // set game renderer
 
+    m_keyboard = new Keyboard();  // init input
     game->SetKeyboard(m_keyboard);  // set game keyboard
+
     game->Init();   // init game
 }
 
@@ -81,22 +89,14 @@ void Application::Render()
 
     Clear();
 
-    m_DeviceResources->PIXBeginEvent(L"Render");
-    auto context = m_DeviceResources->GetD3DDeviceContext();
-
+    m_Renderer->BeginFrame();
     m_Game->Render();
-
-    m_DeviceResources->PIXEndEvent();
-
-    // Show the new frame.
-    m_DeviceResources->Present();
+    m_Renderer->EndFrame();
 }
 
 // Helper method to clear the back buffers.
 void Application::Clear()
 {
-    m_DeviceResources->PIXBeginEvent(L"Clear");
-
     // Clear the views.
     auto context = m_DeviceResources->GetD3DDeviceContext();
     auto renderTarget = m_DeviceResources->GetRenderTargetView();
@@ -109,8 +109,6 @@ void Application::Clear()
     // Set the viewport.
     const auto viewport = m_DeviceResources->GetScreenViewport();
     context->RSSetViewports(1, &viewport);
-
-    m_DeviceResources->PIXEndEvent();
 }
 
 void Application::OnActivated()
@@ -159,9 +157,10 @@ void Application::OnResize(int width, int height)
 // These are the resources that depend on the device.
 void Application::CreateDeviceDependentResources()
 {
-    auto device = m_DeviceResources->GetD3DDevice();
+    delete m_Renderer;
 
-    // TODO: Initialize device dependent objects here (independent of window size).
+    m_Renderer = new Renderer();
+    m_Renderer->Initialize(m_DeviceResources);
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
@@ -179,6 +178,14 @@ void Application::OnDeviceRestored()
 {
     CreateDeviceDependentResources();
 
+    GameRenderer* gameRenderer = new GameRenderer();
+    gameRenderer->SetDrawCubeFn(([this](const GameCube* gc, Matrix world, Matrix view, Matrix projection)
+    {
+        m_Renderer->DrawCube(gc, world, view, projection);
+    }));    // set draw cube function
+    m_Game->SetGameRenderer(gameRenderer);    // set game renderer
+
+
     CreateWindowSizeDependentResources();
 }
 
@@ -192,6 +199,7 @@ Application::~Application()
         delete m_Game;
     }
 
+    delete m_Renderer;
     delete m_DeviceResources;
     delete m_Window;
 }

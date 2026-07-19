@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "Win32Window.h"
 #include "../../graphics/DeviceResources.h"
+#include "../../graphics/Renderer.h"
 #include "../../timer/StepTimer.h"
 #include "Keyboard.h"
 
@@ -53,6 +54,7 @@ class Application : public DX::IDeviceNotify
         Game* m_Game = nullptr;
         Win32Window* m_Window = nullptr;
         DX::DeviceResources* m_DeviceResources = nullptr;
+        Renderer* m_Renderer = nullptr;
         StepTimer m_Timer = StepTimer();
         DirectX::Keyboard* m_keyboard = nullptr;
 };
