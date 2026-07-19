@@ -53,10 +53,10 @@ class Scratch : public Game
         {
             Vector3 eye(0.0f, 0.7f, 1.5f);
             Vector3 at(0.0f, -0.1f, 0.0f);
-            m_View = Matrix::CreateLookAt(eye, at, Vector3::UnitY);
+            m_WVP->View = Matrix::CreateLookAt(eye, at, Vector3::UnitY);
 
             m_RotationAngle += dt * XM_PIDIV4;
-            m_World = Matrix::CreateRotationY(m_RotationAngle);
+            m_WVP->World = Matrix::CreateRotationY(m_RotationAngle);
 
 
             Keyboard::State kbState = GetKeyboard()->GetState();
@@ -69,7 +69,7 @@ class Scratch : public Game
 
         void Render() override
         {
-            GetGameRenderer()->DrawCube(m_GameCube, m_World, m_View, m_Projection);
+            GetGameRenderer()->DrawCube(m_GameCube, m_WVP);
         }
 
         void Shutdown() override
@@ -99,7 +99,7 @@ class Scratch : public Game
             }
 
             // This sample makes use of a right-handed coordinate system using row-major matrices.
-            m_Projection = Matrix::CreatePerspectiveFieldOfView(
+            m_WVP->Projection = Matrix::CreatePerspectiveFieldOfView(
                 fovAngleY,
                 aspectRatio,
                 0.01f,
@@ -108,9 +108,7 @@ class Scratch : public Game
         }
 
     private:
-        Matrix m_World;
-        Matrix m_View;
-        Matrix m_Projection;
+        WVP* m_WVP = new WVP();
 
         GameCube* m_GameCube = nullptr;
         

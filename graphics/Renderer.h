@@ -21,7 +21,7 @@ class Renderer
         void Initialize(DX::DeviceResources* deviceResources);
         void BeginFrame();
         void EndFrame();
-        void DrawCube(const GameCube* gc, const DirectX::SimpleMath::Matrix& world, const DirectX::SimpleMath::Matrix& view, const DirectX::SimpleMath::Matrix& projection);
+        void DrawCube(const GameCube* gc, WVP* pWVP);
 
         ID3D11Device* GetDevice() const noexcept { return m_deviceResources->GetD3DDevice(); }
 

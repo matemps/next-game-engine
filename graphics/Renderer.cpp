@@ -39,13 +39,17 @@ void Renderer::EndFrame()
     m_deviceResources->Present();
 }
 
-void Renderer::DrawCube(const GameCube* gc, const Matrix& world, const Matrix& view, const Matrix& projection)
+void Renderer::DrawCube(const GameCube* gc, WVP* pWVP)
 {
     auto device = m_deviceResources->GetD3DDevice();
     auto context = m_deviceResources->GetD3DDeviceContext();
 
     Cube cube;
     cube.Create(gc, device);
+
+    Matrix& world = pWVP->World;
+    Matrix& view = pWVP->View;
+    Matrix& projection = pWVP->Projection;
 
     WVP wvp;
     wvp.World = world.Transpose();

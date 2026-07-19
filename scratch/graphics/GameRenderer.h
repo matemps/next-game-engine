@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "SimpleMath.h"
+#include "WVP.h"
 
 #include "GameCube.h"
 
@@ -11,19 +11,11 @@ class GameRenderer
 {
     public:
         inline void SetDrawCubeFn(std::function<void(
-            const GameCube*,
-            DirectX::SimpleMath::Matrix,
-            DirectX::SimpleMath::Matrix,
-            DirectX::SimpleMath::Matrix)>
-        callback)
+            const GameCube*, WVP*)> callback)
         {
             DrawCube = callback;
         }
 
     public:
-        std::function<void(
-            const GameCube*,
-            DirectX::SimpleMath::Matrix,
-            DirectX::SimpleMath::Matrix,
-            DirectX::SimpleMath::Matrix)> DrawCube = nullptr;
+        std::function<void(const GameCube*, WVP*)> DrawCube = nullptr;
 };

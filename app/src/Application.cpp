@@ -40,9 +40,9 @@ Application::Application(Game* game) : m_Game(game)
     m_Window->SetOnResizeFn([this](int w, int h) { OnResize(w, h); });
 
     GameRenderer* gameRenderer = new GameRenderer();
-    gameRenderer->SetDrawCubeFn(([this](const GameCube* gc, Matrix world, Matrix view, Matrix projection)
+    gameRenderer->SetDrawCubeFn(([this](const GameCube* gc, WVP* pWVP)
     {
-        m_Renderer->DrawCube(gc, world, view, projection);
+        m_Renderer->DrawCube(gc, pWVP);
     }));    // set draw cube function
     game->SetGameRenderer(gameRenderer);    // set game renderer
 
@@ -179,9 +179,9 @@ void Application::OnDeviceRestored()
     CreateDeviceDependentResources();
 
     GameRenderer* gameRenderer = new GameRenderer();
-    gameRenderer->SetDrawCubeFn(([this](const GameCube* gc, Matrix world, Matrix view, Matrix projection)
+    gameRenderer->SetDrawCubeFn(([this](const GameCube* gc, WVP* pWVP)
     {
-        m_Renderer->DrawCube(gc, world, view, projection);
+        m_Renderer->DrawCube(gc, pWVP);
     }));    // set draw cube function
     m_Game->SetGameRenderer(gameRenderer);    // set game renderer
 
