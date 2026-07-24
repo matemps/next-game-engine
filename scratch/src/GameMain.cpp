@@ -25,28 +25,8 @@ class Scratch : public Game
         void Init() override
         {
             std::cout << "Game initialized." << std::endl;
-            
-            Vertex vertices[] =
-            {
-                { Vector3(-0.5f, -0.5f, -0.5f), Color(0.0f, 0.0f, 0.0f) },
-                { Vector3(-0.5f, -0.5f,  0.5f), Color(0.0f, 0.0f, 1.0f) },
-                { Vector3(-0.5f,  0.5f, -0.5f), Color(0.0f, 1.0f, 0.0f) },
-                { Vector3(-0.5f,  0.5f,  0.5f), Color(0.0f, 1.0f, 1.0f) },
-                { Vector3( 0.5f, -0.5f, -0.5f), Color(1.0f, 0.0f, 0.0f) },
-                { Vector3( 0.5f, -0.5f,  0.5f), Color(1.0f, 0.0f, 1.0f) },
-                { Vector3( 0.5f,  0.5f, -0.5f), Color(1.0f, 1.0f, 0.0f) },
-                { Vector3( 0.5f,  0.5f,  0.5f), Color(1.0f, 1.0f, 1.0f) },
-            };
-            uint16_t indices[] =
-            {
-                0,2,1, 1,2,3,
-                4,5,6, 5,7,6,
-                0,1,5, 0,5,4,
-                2,6,7, 2,7,3,
-                0,4,6, 0,6,2,
-                1,3,7, 1,7,5,
-            };
-            m_GameCube = new GameCube(vertices, indices);
+
+            m_GameCube = new GameCube(1.0f);
         }
         
         void Update(float dt) override

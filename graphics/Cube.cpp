@@ -6,25 +6,49 @@ using Microsoft::WRL::ComPtr;
 
 void Cube::Create(const GameCube* cube, ID3D11Device* device)
 {
-    m_indexCount = static_cast<UINT>(cube->m_Indices.size());
+    const float s = cube->m_Size * 0.5f;
+
+    Vertex vertices[] =
+    {
+        { Vector3(-s, -s, -s), Color(0.0f, 0.0f, 0.0f) },
+        { Vector3(-s, -s,  s), Color(0.0f, 0.0f, 1.0f) },
+        { Vector3(-s,  s, -s), Color(0.0f, 1.0f, 0.0f) },
+        { Vector3(-s,  s,  s), Color(0.0f, 1.0f, 1.0f) },
+        { Vector3( s, -s, -s), Color(1.0f, 0.0f, 0.0f) },
+        { Vector3( s, -s,  s), Color(1.0f, 0.0f, 1.0f) },
+        { Vector3( s,  s, -s), Color(1.0f, 1.0f, 0.0f) },
+        { Vector3( s,  s,  s), Color(1.0f, 1.0f, 1.0f) },
+    };
+
+    uint16_t indices[] =
+    {
+        0,2,1, 1,2,3,
+        4,5,6, 5,7,6,
+        0,1,5, 0,5,4,
+        2,6,7, 2,7,3,
+        0,4,6, 0,6,2,
+        1,3,7, 1,7,5,
+    };
+
+    m_indexCount = static_cast<UINT>(std::size(indices));
 
     D3D11_BUFFER_DESC vertexBufferDesc = {};
-    vertexBufferDesc.ByteWidth = static_cast<UINT>(cube->m_Vertices.size() * sizeof(Vertex));
+    vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(vertices));
     vertexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
     vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
     D3D11_SUBRESOURCE_DATA vertexData = {};
-    vertexData.pSysMem = cube->m_Vertices.data();
+    vertexData.pSysMem = vertices;
 
     DX::ThrowIfFailed(device->CreateBuffer(&vertexBufferDesc, &vertexData, m_vertexBuffer.ReleaseAndGetAddressOf()));
 
     D3D11_BUFFER_DESC indexBufferDesc = {};
-    indexBufferDesc.ByteWidth = static_cast<UINT>(cube->m_Indices.size() * sizeof(uint16_t));
+    indexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(indices));
     indexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
     indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 
     D3D11_SUBRESOURCE_DATA indexData = {};
-    indexData.pSysMem = cube->m_Indices.data();
+    indexData.pSysMem = indices;
 
     DX::ThrowIfFailed(device->CreateBuffer(&indexBufferDesc, &indexData, m_indexBuffer.ReleaseAndGetAddressOf()));
 }
