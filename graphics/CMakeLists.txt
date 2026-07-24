@@ -2,6 +2,7 @@ add_library(graphics STATIC
     pch.cpp
     DeviceResources.cpp
     Cube.cpp
+    Sphere.cpp
     Shader.cpp
     Renderer.cpp
 )

@@ -63,3 +63,28 @@ void Renderer::DrawCube(const GameCube* gc, WVP* pWVP)
 
     cube.Draw(context);
 }
+
+void Renderer::DrawSphere(const GameSphere* gs, WVP* pWVP)
+{
+    auto device = m_deviceResources->GetD3DDevice();
+    auto context = m_deviceResources->GetD3DDeviceContext();
+
+    Sphere sphere;
+    sphere.Create(gs, device);
+
+    Matrix& world = pWVP->World;
+    Matrix& view = pWVP->View;
+    Matrix& projection = pWVP->Projection;
+
+    WVP wvp;
+    wvp.World = world.Transpose();
+    wvp.View = view.Transpose();
+    wvp.Projection = projection.Transpose();
+
+    m_constantBuffer.SetData(context, wvp);
+
+    ID3D11Buffer* buffer = m_constantBuffer.GetBuffer();
+    context->VSSetConstantBuffers(0, 1, &buffer);
+
+    sphere.Draw(context);
+}

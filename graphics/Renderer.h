@@ -12,6 +12,9 @@
 #include "Cube.h"
 #include "GameCube.h"
 
+#include "Sphere.h"
+#include "GameSphere.h"
+
 #include "WVP.h"
 
 
@@ -22,6 +25,7 @@ class Renderer
         void BeginFrame();
         void EndFrame();
         void DrawCube(const GameCube* gc, WVP* pWVP);
+        void DrawSphere(const GameSphere* gs, WVP* pWVP);
 
         ID3D11Device* GetDevice() const noexcept { return m_deviceResources->GetD3DDevice(); }
 

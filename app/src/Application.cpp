@@ -44,6 +44,10 @@ Application::Application(Game* game) : m_Game(game)
     {
         m_Renderer->DrawCube(gc, pWVP);
     }));    // set draw cube function
+    gameRenderer->SetDrawSphereFn(([this](const GameSphere* gs, WVP* pWVP)
+    {
+        m_Renderer->DrawSphere(gs, pWVP);
+    }));    // set draw sphere function
     game->SetGameRenderer(gameRenderer);    // set game renderer
 
     m_keyboard = new Keyboard();  // init input
@@ -183,6 +187,10 @@ void Application::OnDeviceRestored()
     {
         m_Renderer->DrawCube(gc, pWVP);
     }));    // set draw cube function
+    gameRenderer->SetDrawSphereFn(([this](const GameSphere* gs, WVP* pWVP)
+    {
+        m_Renderer->DrawSphere(gs, pWVP);
+    }));    // set draw sphere function
     m_Game->SetGameRenderer(gameRenderer);    // set game renderer
 
 
