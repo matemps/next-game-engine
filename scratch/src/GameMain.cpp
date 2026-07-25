@@ -30,7 +30,7 @@ class Scratch : public Game
             m_GameCube = new GameCube(1.0f);
             m_GamePlane = new GamePlane(5.0f, 5.0f);
         }
-        
+
         void Update(float dt) override
         {
             Vector3 eye(0.0f, 0.7f, 1.5f);
@@ -39,7 +39,6 @@ class Scratch : public Game
 
             m_RotationAngle += dt * XM_PIDIV4;
             m_WVP->World = Matrix::CreateRotationY(m_RotationAngle);
-
 
             Keyboard::State kbState = GetKeyboard()->GetState();
 
