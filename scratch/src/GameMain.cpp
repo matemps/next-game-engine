@@ -46,6 +46,14 @@ class Scratch : public Game
             if (kbState.A) { std::cout << "Pressed A." << std::endl; }
             if (kbState.S) { std::cout << "Pressed S." << std::endl; }
             if (kbState.D) { std::cout << "Pressed D." << std::endl; }
+
+            if (kbState.Space) { std::cout << "Pressed Space." << std::endl; }
+            if (kbState.LeftControl) { std::cout << "Pressed LeftControl." << std::endl; }
+
+            if (kbState.Left) { std::cout << "Pressed Left." << std::endl; }
+            if (kbState.Right) { std::cout << "Pressed Right." << std::endl; }
+            if (kbState.Up) { std::cout << "Pressed Up." << std::endl; }
+            if (kbState.Down) { std::cout << "Pressed Down." << std::endl; }
         }
 
         void Render() override
