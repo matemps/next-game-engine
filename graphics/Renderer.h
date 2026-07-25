@@ -32,6 +32,6 @@ class Renderer
     private:
         DX::DeviceResources* m_deviceResources = nullptr;
         Shader m_shader;
-        ConstantBuffer<WVP> m_constantBuffer;
+        ConstantBuffer m_constantBuffer;
         Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizerState;
 };

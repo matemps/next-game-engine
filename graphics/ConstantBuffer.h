@@ -1,25 +1,22 @@
 #pragma once
 
 #include "pch.h"
+#include "WVP.h"
 
-
-template <typename T>
 class ConstantBuffer
 {
     public:
         void Create(ID3D11Device* device)
         {
-            static_assert(sizeof(T) % 16 == 0, "Constant buffer size must be 16-byte aligned");
-
             D3D11_BUFFER_DESC desc = {};
-            desc.ByteWidth = sizeof(T);
+            desc.ByteWidth = sizeof(WVP);
             desc.Usage = D3D11_USAGE_DEFAULT;
             desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 
             DX::ThrowIfFailed(device->CreateBuffer(&desc, nullptr, m_buffer.ReleaseAndGetAddressOf()));
         }
 
-        void SetData(ID3D11DeviceContext* context, const T& data)
+        void SetData(ID3D11DeviceContext* context, const WVP& data)
         {
             context->UpdateSubresource(m_buffer.Get(), 0, nullptr, &data, 0, 0);
         }
