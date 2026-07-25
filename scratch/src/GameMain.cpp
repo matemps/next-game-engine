@@ -11,6 +11,7 @@
 #include "WVP.h"
 
 #include "GameCube.h"
+#include "GamePlane.h"
 
 
 using namespace DirectX;
@@ -27,6 +28,7 @@ class Scratch : public Game
             std::cout << "Game initialized." << std::endl;
 
             m_GameCube = new GameCube(1.0f);
+            m_GamePlane = new GamePlane(5.0f, 5.0f);
         }
         
         void Update(float dt) override
@@ -50,6 +52,10 @@ class Scratch : public Game
         void Render() override
         {
             GetGameRenderer()->DrawCube(m_GameCube, m_WVP);
+
+            WVP planeWVP = *m_WVP;
+            planeWVP.World = Matrix::CreateTranslation(0.0f, -0.5f, 0.0f);
+            GetGameRenderer()->DrawPlane(m_GamePlane, &planeWVP);
         }
 
         void Shutdown() override
@@ -91,7 +97,8 @@ class Scratch : public Game
         WVP* m_WVP = new WVP();
 
         GameCube* m_GameCube = nullptr;
-        
+        GamePlane* m_GamePlane = nullptr;
+
         float m_RotationAngle = 0.0f;
 };
 

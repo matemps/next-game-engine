@@ -44,6 +44,10 @@ Application::Application(Game* game) : m_Game(game)
     {
         m_Renderer->DrawCube(gc, pWVP);
     }));    // set draw cube function
+    gameRenderer->SetDrawPlaneFn(([this](const GamePlane* gp, WVP* pWVP)
+    {
+        m_Renderer->DrawPlane(gp, pWVP);
+    }));    // set draw plane function
     game->SetGameRenderer(gameRenderer);    // set game renderer
 
     m_keyboard = new Keyboard();  // init input
@@ -183,6 +187,10 @@ void Application::OnDeviceRestored()
     {
         m_Renderer->DrawCube(gc, pWVP);
     }));    // set draw cube function
+    gameRenderer->SetDrawPlaneFn(([this](const GamePlane* gp, WVP* pWVP)
+    {
+        m_Renderer->DrawPlane(gp, pWVP);
+    }));    // set draw plane function
     m_Game->SetGameRenderer(gameRenderer);    // set game renderer
 
 
