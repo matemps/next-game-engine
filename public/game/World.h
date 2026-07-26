@@ -8,8 +8,6 @@
 #include "GamePlane.h"
 #include "GameRenderer.h"
 
-#include "Camera.h"
-
 
 using namespace DirectX::SimpleMath;
 
