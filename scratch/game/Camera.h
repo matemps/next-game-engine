@@ -14,52 +14,22 @@ using namespace DirectX::SimpleMath;
 class Camera
 {
     public:
-        Camera() = default;
-        inline Camera(Vector3 eye, Vector3 at, Vector3 up = Vector3::UnitY)
-            : m_Eye(eye), m_Up(up)
-        {
-            Vector3 direction = at - eye;
-            direction.Normalize();
-
-            m_Pitch = asinf(direction.y);
-            m_Yaw = atan2f(direction.x, -direction.z);
-        }
-
-    public:
         inline Matrix GetViewMatrix() const
         {
-            return Matrix::CreateLookAt(m_Eye, m_Eye + GetForward(), m_Up);
+            return Matrix::CreateLookAt(
+                m_Eye,
+                m_Eye + GetForward(),
+                m_Up
+            );
         }
 
         inline Matrix GetProjectionMatrix() const
         {
-            float fovAngleY = m_FovY;
-
-            // This is a simple example of change that can be made when the app is in
-            // portrait or snapped view.
-            if (m_AspectRatio < 1.0f)
-            {
-                fovAngleY *= 2.0f;
-            }
-
-            return Matrix::CreatePerspectiveFieldOfView(fovAngleY, m_AspectRatio, m_NearZ, m_FarZ);
-        }
-
-    public:
-        // movement (amount is world units, already scaled by speed/dt)
-        inline void MoveForward(float amount) { m_Eye += GetForward() * amount; }
-        inline void MoveRight(float amount) { m_Eye += GetRight() * amount; }
-        inline void MoveUp(float amount) { m_Eye += Vector3::UnitY * amount; }
-
-        // look (deltas in radians, already scaled by speed/dt)
-        inline void Rotate(float yawDelta, float pitchDelta)
-        {
-            m_Yaw += yawDelta;
-            m_Pitch += pitchDelta;
-
-            // Avoid gimbal flip by keeping pitch just shy of straight up/down.
-            const float pitchLimit = XM_PIDIV2 - 0.01f;
-            m_Pitch = std::clamp(m_Pitch, -pitchLimit, pitchLimit);
+            return Matrix::CreatePerspectiveFieldOfView(
+                m_Fov, m_AspectRatio,
+                m_NearPlane,
+                m_FarPlane
+            );
         }
 
     public:
@@ -77,30 +47,117 @@ class Camera
         }
 
     public:
-        // getters
-        inline Vector3 GetPosition() const { return m_Eye; }
-        inline Vector3 GetUp() const { return m_Up; }
+        // movement
 
-        // setters
-        inline void SetPosition(Vector3 eye) { m_Eye = eye; }
-        inline void SetUp(Vector3 up) { m_Up = up; }
-        inline void SetAspectRatio(float aspectRatio) { m_AspectRatio = aspectRatio; }
-        inline void SetLens(float fovAngleY, float nearZ, float farZ)
+        inline void MoveForward(float dt)
         {
-            m_FovY = fovAngleY;
-            m_NearZ = nearZ;
-            m_FarZ = farZ;
+            float moveAmount = m_MoveSpeed * dt;
+            m_Eye += GetForward() * moveAmount;
         }
 
-    private:
-        Vector3 m_Eye = Vector3(0.0f, 0.7f, 1.5f);
-        Vector3 m_Up = Vector3::UnitY;
+        inline void MoveBackward(float dt)
+        {
+            float moveAmount = m_MoveSpeed * dt;
+            m_Eye -= GetForward() * moveAmount;
+        }
 
+        inline void MoveRight(float dt)
+        {
+            float moveAmount = m_MoveSpeed * dt;
+            m_Eye += GetRight() * moveAmount;
+        }
+
+        inline void MoveLeft(float dt)
+        {
+            float moveAmount = m_MoveSpeed * dt;
+            m_Eye -= GetRight() * moveAmount;
+        }
+
+        inline void MoveUp(float dt)
+        {
+            float moveAmount = m_MoveSpeed * dt;
+            m_Eye += Vector3::UnitY * moveAmount;
+        }
+
+        inline void MoveDown(float dt)
+        {
+            float moveAmount = m_MoveSpeed * dt;
+            m_Eye -= Vector3::UnitY * moveAmount;
+        }
+
+    public:
+        // rotation
+        
+        inline void RotateRight(float dt)
+        {
+            float rotateAmount = m_RotateSpeed * dt;
+            m_Yaw += rotateAmount;
+        }
+
+        inline void RotateLeft(float dt)
+        {
+            float rotateAmount = m_RotateSpeed * dt;
+            m_Yaw -= rotateAmount;
+        }
+
+        inline void RotateUp(float dt)
+        {
+            float rotateAmount = m_RotateSpeed * dt;
+
+            // Avoid gimbal flip by keeping pitch just shy of straight up/down.
+            const float pitchLimit = XM_PIDIV2 - 0.01f;
+            m_Pitch = std::clamp(
+                m_Pitch + rotateAmount,
+                -pitchLimit,
+                pitchLimit
+            );
+        }
+
+        inline void RotateDown(float dt)
+        {
+            float rotateAmount = m_RotateSpeed * dt;
+
+            // Avoid gimbal flip by keeping pitch just shy of straight up/down.
+            const float pitchLimit = XM_PIDIV2 - 0.01f;
+            m_Pitch = std::clamp(
+                m_Pitch - rotateAmount,
+                -pitchLimit,
+                pitchLimit
+            );
+        }
+
+    public:
+        // setters
+
+        inline void SetAspectRatio(float aspectRatio) { m_AspectRatio = aspectRatio; }
+
+    private:
+        // eye level (default: 64 units)
+        float m_EyeLevel = 64.0f;
+
+        // camera movement speed (default: 150 units per second)
+        float m_MoveSpeed = 150.0f;
+
+        // camera rotation speed (default: 90 degrees per second)
+        float m_RotateSpeed = XM_PI / 2.0f;
+
+        // fov (default: 75 degrees)
+        float m_Fov = 75.0f * (XM_PI / 180.0f);
+
+        // yaw & pitch
         float m_Yaw = 0.0f;
         float m_Pitch = 0.0f;
 
-        float m_FovY = 70.0f * XM_PI / 180.0f;
-        float m_NearZ = 0.01f;
-        float m_FarZ = 100.0f;
+        // aspect ratio
         float m_AspectRatio = 1.0f;
+
+        // near & far plane
+        float m_NearPlane = 7.0f;
+        float m_FarPlane = 28377.92f;
+
+    private:
+        // 3d vectors
+
+        Vector3 m_Eye = Vector3(0.0f, m_EyeLevel, 0.0f);
+        Vector3 m_Up = Vector3::UnitY;
 };

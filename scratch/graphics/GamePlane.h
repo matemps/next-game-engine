@@ -4,9 +4,10 @@
 class GamePlane
 {
     public:
-        inline GamePlane(float width, float depth) : m_Width(width), m_Depth(depth) {}
+        inline GamePlane(float length, float width): 
+            m_Length(length), m_Width(width) {}
 
     public:
+        float m_Length;
         float m_Width;
-        float m_Depth;
 };

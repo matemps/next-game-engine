@@ -6,7 +6,7 @@ using Microsoft::WRL::ComPtr;
 
 void Cube::Create(const GameCube* cube, ID3D11Device* device)
 {
-    const float s = cube->m_Size * 0.5f;
+    const float s = cube->m_Size;
 
     Vertex vertices[] =
     {

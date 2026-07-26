@@ -40,9 +40,9 @@ class World
             m_Cubes.push_back({ new GameCube(size), transform });
         }
 
-        inline void AddPlane(float width, float depth, Matrix transform = Matrix::Identity)
+        inline void AddPlane(float length, float width, Matrix transform = Matrix::Identity)
         {
-            m_Planes.push_back({ new GamePlane(width, depth), transform });
+            m_Planes.push_back({ new GamePlane(length, width), transform });
         }
 
         inline void Render(GameRenderer* renderer, const Matrix view, const Matrix projection) const

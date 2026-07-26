@@ -6,15 +6,15 @@ using Microsoft::WRL::ComPtr;
 
 void ::Plane::Create(const GamePlane* plane, ID3D11Device* device)
 {
-    const float w = plane->m_Width * 0.5f;
-    const float d = plane->m_Depth * 0.5f;
+    const float l = plane->m_Length;
+    const float w = plane->m_Width;
 
     Vertex vertices[] =
     {
-        { Vector3(-w, 0.0f, -d), Color(1.0f, 1.0f, 1.0f) },
-        { Vector3(-w, 0.0f,  d), Color(1.0f, 1.0f, 1.0f) },
-        { Vector3( w, 0.0f, -d), Color(1.0f, 1.0f, 1.0f) },
-        { Vector3( w, 0.0f,  d), Color(1.0f, 1.0f, 1.0f) },
+        { Vector3(-l, 0.0f, -w), Color(1.0f, 1.0f, 1.0f) },
+        { Vector3(-l, 0.0f,  w), Color(1.0f, 1.0f, 1.0f) },
+        { Vector3( l, 0.0f, -w), Color(1.0f, 1.0f, 1.0f) },
+        { Vector3( l, 0.0f,  w), Color(1.0f, 1.0f, 1.0f) },
     };
 
     uint16_t indices[] =
