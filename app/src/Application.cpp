@@ -40,9 +40,9 @@ Application::Application(Game* game) : m_Game(game)
     m_Window->SetOnResizeFn([this](int w, int h) { OnResize(w, h); });
 
     GameRenderer* gameRenderer = new GameRenderer();
-    gameRenderer->SetDrawCubeFn(([this](const GameCube* gc, WVP* pWVP)
+    gameRenderer->SetDrawBlockFn(([this](const GameBlock* gb, WVP* pWVP)
     {
-        m_Renderer->DrawCube(gc, pWVP);
+        m_Renderer->DrawBlock(gb, pWVP);
     }));    // set draw cube function
     gameRenderer->SetDrawPlaneFn(([this](const GamePlane* gp, WVP* pWVP)
     {
@@ -183,9 +183,9 @@ void Application::OnDeviceRestored()
     CreateDeviceDependentResources();
 
     GameRenderer* gameRenderer = new GameRenderer();
-    gameRenderer->SetDrawCubeFn(([this](const GameCube* gc, WVP* pWVP)
+    gameRenderer->SetDrawBlockFn(([this](const GameBlock* gb, WVP* pWVP)
     {
-        m_Renderer->DrawCube(gc, pWVP);
+        m_Renderer->DrawBlock(gb, pWVP);
     }));    // set draw cube function
     gameRenderer->SetDrawPlaneFn(([this](const GamePlane* gp, WVP* pWVP)
     {

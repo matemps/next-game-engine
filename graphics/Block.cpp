@@ -1,23 +1,25 @@
 #include "pch.h"
-#include "Cube.h"
+#include "Block.h"
 
 using Microsoft::WRL::ComPtr;
 
 
-void Cube::Create(const GameCube* cube, ID3D11Device* device)
+void Block::Create(const GameBlock* block, ID3D11Device* device)
 {
-    const float s = cube->m_Size;
+    const float l = block->m_Length;
+    const float w = block->m_Width;
+    const float h = block->m_Height;
 
     Vertex vertices[] =
     {
-        { Vector3(-s, -s, -s), Color(0.0f, 0.0f, 0.0f) },
-        { Vector3(-s, -s,  s), Color(0.0f, 0.0f, 1.0f) },
-        { Vector3(-s,  s, -s), Color(0.0f, 1.0f, 0.0f) },
-        { Vector3(-s,  s,  s), Color(0.0f, 1.0f, 1.0f) },
-        { Vector3( s, -s, -s), Color(1.0f, 0.0f, 0.0f) },
-        { Vector3( s, -s,  s), Color(1.0f, 0.0f, 1.0f) },
-        { Vector3( s,  s, -s), Color(1.0f, 1.0f, 0.0f) },
-        { Vector3( s,  s,  s), Color(1.0f, 1.0f, 1.0f) },
+        { Vector3(-l, -h, -w), Color(0.0f, 0.0f, 0.0f) },
+        { Vector3(-l, -h,  w), Color(0.0f, 0.0f, 1.0f) },
+        { Vector3(-l,  h, -w), Color(0.0f, 1.0f, 0.0f) },
+        { Vector3(-l,  h,  w), Color(0.0f, 1.0f, 1.0f) },
+        { Vector3( l, -h, -w), Color(1.0f, 0.0f, 0.0f) },
+        { Vector3( l, -h,  w), Color(1.0f, 0.0f, 1.0f) },
+        { Vector3( l,  h, -w), Color(1.0f, 1.0f, 0.0f) },
+        { Vector3( l,  h,  w), Color(1.0f, 1.0f, 1.0f) },
     };
 
     uint16_t indices[] =
@@ -53,7 +55,7 @@ void Cube::Create(const GameCube* cube, ID3D11Device* device)
     DX::ThrowIfFailed(device->CreateBuffer(&indexBufferDesc, &indexData, m_indexBuffer.ReleaseAndGetAddressOf()));
 }
 
-void Cube::Draw(ID3D11DeviceContext* context) const
+void Block::Draw(ID3D11DeviceContext* context) const
 {
     context->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &m_stride, &m_offset);
     context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);

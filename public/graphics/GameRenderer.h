@@ -4,17 +4,17 @@
 
 #include "WVP.h"
 
-#include "GameCube.h"
+#include "GameBlock.h"
 #include "GamePlane.h"
 
 
 class GameRenderer
 {
     public:
-        inline void SetDrawCubeFn(std::function<void(
-            const GameCube*, WVP*)> callback)
+        inline void SetDrawBlockFn(std::function<void(
+            const GameBlock*, WVP*)> callback)
         {
-            DrawCube = callback;
+            DrawBlock = callback;
         }
 
         inline void SetDrawPlaneFn(std::function<void(
@@ -24,6 +24,6 @@ class GameRenderer
         }
 
     public:
-        std::function<void(const GameCube*, WVP*)> DrawCube = nullptr;
+        std::function<void(const GameBlock*, WVP*)> DrawBlock = nullptr;
         std::function<void(const GamePlane*, WVP*)> DrawPlane = nullptr;
 };

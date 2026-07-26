@@ -4,17 +4,17 @@
 #include "SimpleMath.h"
 
 #include "Vertex.h"
-#include "GameCube.h"
+#include "GameBlock.h"
 
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
 
-class Cube
+class Block
 {
     public:
-        void Create(const GameCube* cube, ID3D11Device* device);
+        void Create(const GameBlock* block, ID3D11Device* device);
         void Draw(ID3D11DeviceContext* context) const;
 
     private:

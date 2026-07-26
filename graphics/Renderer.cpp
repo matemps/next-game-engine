@@ -39,13 +39,13 @@ void Renderer::EndFrame()
     m_deviceResources->Present();
 }
 
-void Renderer::DrawCube(const GameCube* gc, WVP* pWVP)
+void Renderer::DrawBlock(const GameBlock* gb, WVP* pWVP)
 {
     auto device = m_deviceResources->GetD3DDevice();
     auto context = m_deviceResources->GetD3DDeviceContext();
 
-    Cube cube;
-    cube.Create(gc, device);
+    Block block;
+    block.Create(gb, device);
 
     Matrix& world = pWVP->World;
     Matrix& view = pWVP->View;
@@ -61,7 +61,7 @@ void Renderer::DrawCube(const GameCube* gc, WVP* pWVP)
     ID3D11Buffer* buffer = m_constantBuffer.GetBuffer();
     context->VSSetConstantBuffers(0, 1, &buffer);
 
-    cube.Draw(context);
+    block.Draw(context);
 }
 
 void Renderer::DrawPlane(const GamePlane* gp, WVP* pWVP)

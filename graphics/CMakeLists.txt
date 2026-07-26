@@ -1,7 +1,7 @@
 add_library(graphics STATIC
     pch.cpp
     DeviceResources.cpp
-    Cube.cpp
+    Block.cpp
     Plane.cpp
     Shader.cpp
     Renderer.cpp

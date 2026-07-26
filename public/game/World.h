@@ -4,7 +4,7 @@
 
 #include "SimpleMath.h"
 
-#include "GameCube.h"
+#include "GameBlock.h"
 #include "GamePlane.h"
 #include "GameRenderer.h"
 
@@ -12,9 +12,9 @@
 using namespace DirectX::SimpleMath;
 
 
-struct WorldCube
+struct WorldBlock
 {
-    GameCube* Cube;
+    GameBlock* Block;
     Matrix Transform;
 };
 
@@ -30,14 +30,19 @@ class World
     public:
         inline ~World()
         {
-            for (WorldCube& worldCube : m_Cubes) { delete worldCube.Cube; }
+            for (WorldBlock& worldBlock : m_Blocks) { delete worldBlock.Block; }
             for (WorldPlane& worldPlane : m_Planes) { delete worldPlane.Plane; }
         }
 
     public:
-        inline void AddCube(float size, Matrix transform = Matrix::Identity)
+        inline void AddBlock(
+            float length,
+            float width,
+            float height,
+            Matrix transform = Matrix::Identity
+        )
         {
-            m_Cubes.push_back({ new GameCube(size), transform });
+            m_Blocks.push_back({ new GameBlock(length, width, height), transform });
         }
 
         inline void AddPlane(float length, float width, Matrix transform = Matrix::Identity)
@@ -47,14 +52,14 @@ class World
 
         inline void Render(GameRenderer* renderer, const Matrix view, const Matrix projection) const
         {
-            for (const WorldCube& worldCube : m_Cubes)
+            for (const WorldBlock& worldBlock : m_Blocks)
             {
                 WVP wvp;
-                wvp.World = worldCube.Transform;
+                wvp.World = worldBlock.Transform;
                 wvp.View = view;
                 wvp.Projection = projection;
 
-                renderer->DrawCube(worldCube.Cube, &wvp);
+                renderer->DrawBlock(worldBlock.Block, &wvp);
             }
 
             for (const WorldPlane& worldPlane : m_Planes)
@@ -67,14 +72,8 @@ class World
                 renderer->DrawPlane(worldPlane.Plane, &wvp);
             }
         }
-
-    public:
-        // getters
         
-        inline const std::vector<WorldCube>& GetCubes() const { return m_Cubes; }
-        inline const std::vector<WorldPlane>& GetPlanes() const { return m_Planes; }
-
     private:
-        std::vector<WorldCube> m_Cubes;
+        std::vector<WorldBlock> m_Blocks;
         std::vector<WorldPlane> m_Planes;
 };

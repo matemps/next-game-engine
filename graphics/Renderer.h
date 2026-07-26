@@ -9,8 +9,8 @@
 
 #include "GameRenderer.h"
 
-#include "Cube.h"
-#include "GameCube.h"
+#include "Block.h"
+#include "GameBlock.h"
 
 #include "Plane.h"
 #include "GamePlane.h"
@@ -24,7 +24,7 @@ class Renderer
         void Initialize(DX::DeviceResources* deviceResources);
         void BeginFrame();
         void EndFrame();
-        void DrawCube(const GameCube* gc, WVP* pWVP);
+        void DrawBlock(const GameBlock* gb, WVP* pWVP);
         void DrawPlane(const GamePlane* gp, WVP* pWVP);
 
         ID3D11Device* GetDevice() const noexcept { return m_deviceResources->GetD3DDevice(); }

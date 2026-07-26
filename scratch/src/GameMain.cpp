@@ -28,7 +28,7 @@ class Scratch : public Game
             std::cout << "Game initialized." << std::endl;
 
             m_World = new World();
-            m_World->AddCube(100.0f);
+            m_World->AddBlock(100.0f, 100.0f, 250.0f);
             m_World->AddPlane(1000.0f, 1000.0f, Matrix::CreateTranslation(0.0f, -150.0f, 0.0f));
         }
 
