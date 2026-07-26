@@ -6,8 +6,6 @@
 #include <DirectXMath.h>
 #include "SimpleMath.h"
 
-#include "WVP.h"
-
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -45,16 +43,6 @@ class Camera
             }
 
             return Matrix::CreatePerspectiveFieldOfView(fovAngleY, m_AspectRatio, m_NearZ, m_FarZ);
-        }
-
-        // Assembles a WVP for the given world transform using this camera's view/projection.
-        inline WVP GetWVP(Matrix world) const
-        {
-            WVP wvp;
-            wvp.World = world;
-            wvp.View = GetViewMatrix();
-            wvp.Projection = GetProjectionMatrix();
-            return wvp;
         }
 
     public:

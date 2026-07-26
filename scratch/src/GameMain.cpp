@@ -60,7 +60,11 @@ class Scratch : public Game
 
         void Render() override
         {
-            m_World->Render(GetGameRenderer(), m_Camera);
+            m_World->Render(
+                GetGameRenderer(),
+                m_Camera->GetViewMatrix(),
+                m_Camera->GetProjectionMatrix()
+            );
         }
 
         void Shutdown() override

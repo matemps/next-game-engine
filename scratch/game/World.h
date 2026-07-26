@@ -47,17 +47,25 @@ class World
             m_Planes.push_back({ new GamePlane(width, depth), transform });
         }
 
-        inline void Render(GameRenderer* renderer, const Camera* camera) const
+        inline void Render(GameRenderer* renderer, const Matrix view, const Matrix projection) const
         {
             for (const WorldCube& worldCube : m_Cubes)
             {
-                WVP wvp = camera->GetWVP(worldCube.Transform);
+                WVP wvp;
+                wvp.World = worldCube.Transform;
+                wvp.View = view;
+                wvp.Projection = projection;
+
                 renderer->DrawCube(worldCube.Cube, &wvp);
             }
 
             for (const WorldPlane& worldPlane : m_Planes)
             {
-                WVP wvp = camera->GetWVP(worldPlane.Transform);
+                WVP wvp;
+                wvp.World = worldPlane.Transform;
+                wvp.View = view;
+                wvp.Projection = projection;
+
                 renderer->DrawPlane(worldPlane.Plane, &wvp);
             }
         }
