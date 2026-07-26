@@ -8,13 +8,13 @@
 #include <dxgi1_6.h>
 #include <DirectXMath.h>
 #include <DirectXColors.h>
-#include "WVP.h"
 
-#include "GameCube.h"
-#include "GamePlane.h"
+#include "Camera.h"
+#include "World.h"
 
 
 using namespace DirectX;
+using namespace DirectX::SimpleMath;
 
 
 class Scratch : public Game
@@ -27,42 +27,40 @@ class Scratch : public Game
         {
             std::cout << "Game initialized." << std::endl;
 
-            m_GameCube = new GameCube(1.0f);
-            m_GamePlane = new GamePlane(5.0f, 5.0f);
+            m_World = new World();
+            m_World->AddCube(1.0f);
+            m_World->AddPlane(5.0f, 5.0f, Matrix::CreateTranslation(0.0f, -0.5f, 0.0f));
         }
 
         void Update(float dt) override
         {
-            Vector3 eye(0.0f, 0.7f, 1.5f);
-            Vector3 at(0.0f, -0.1f, 0.0f);
-            m_WVP->View = Matrix::CreateLookAt(eye, at, Vector3::UnitY);
-
-            m_RotationAngle += dt * XM_PIDIV4;
-            m_WVP->World = Matrix::CreateRotationY(m_RotationAngle);
-
             Keyboard::State kbState = GetKeyboard()->GetState();
 
-            if (kbState.W) { std::cout << "Pressed W." << std::endl; }
-            if (kbState.A) { std::cout << "Pressed A." << std::endl; }
-            if (kbState.S) { std::cout << "Pressed S." << std::endl; }
-            if (kbState.D) { std::cout << "Pressed D." << std::endl; }
+            float moveAmount = m_MoveSpeed * dt;
+            float rotateAmount = m_RotateSpeed * dt;
 
-            if (kbState.Space) { std::cout << "Pressed Space." << std::endl; }
-            if (kbState.LeftControl) { std::cout << "Pressed LeftControl." << std::endl; }
+            if (kbState.W) { m_Camera->MoveForward(moveAmount); }
+            if (kbState.S) { m_Camera->MoveForward(-moveAmount); }
+            if (kbState.A) { m_Camera->MoveRight(-moveAmount); }
+            if (kbState.D) { m_Camera->MoveRight(moveAmount); }
 
-            if (kbState.Left) { std::cout << "Pressed Left." << std::endl; }
-            if (kbState.Right) { std::cout << "Pressed Right." << std::endl; }
-            if (kbState.Up) { std::cout << "Pressed Up." << std::endl; }
-            if (kbState.Down) { std::cout << "Pressed Down." << std::endl; }
+            if (kbState.Space) { m_Camera->MoveUp(moveAmount); }
+            if (kbState.LeftControl) { m_Camera->MoveUp(-moveAmount); }
+
+            float yawDelta = 0.0f;
+            float pitchDelta = 0.0f;
+
+            if (kbState.Left) { yawDelta -= rotateAmount; }
+            if (kbState.Right) { yawDelta += rotateAmount; }
+            if (kbState.Up) { pitchDelta += rotateAmount; }
+            if (kbState.Down) { pitchDelta -= rotateAmount; }
+
+            if (yawDelta != 0.0f || pitchDelta != 0.0f) { m_Camera->Rotate(yawDelta, pitchDelta); }
         }
 
         void Render() override
         {
-            GetGameRenderer()->DrawCube(m_GameCube, m_WVP);
-
-            WVP planeWVP = *m_WVP;
-            planeWVP.World = Matrix::CreateTranslation(0.0f, -0.5f, 0.0f);
-            GetGameRenderer()->DrawPlane(m_GamePlane, &planeWVP);
+            m_World->Render(GetGameRenderer(), m_Camera);
         }
 
         void Shutdown() override
@@ -82,31 +80,15 @@ class Scratch : public Game
             // TO DO: protect against a divide by zero exception
             float aspectRatio = static_cast<float>(GetWidth()) / static_cast<float>(GetHeight());
 
-            float fovAngleY = 70.0f * XM_PI / 180.0f;
-
-            // This is a simple example of change that can be made when the app is in
-            // portrait or snapped view.
-            if (aspectRatio < 1.0f)
-            {
-                fovAngleY *= 2.0f;
-            }
-
-            // This sample makes use of a right-handed coordinate system using row-major matrices.
-            m_WVP->Projection = Matrix::CreatePerspectiveFieldOfView(
-                fovAngleY,
-                aspectRatio,
-                0.01f,
-                100.0f
-            );
+            m_Camera->SetAspectRatio(aspectRatio);
         }
 
     private:
-        WVP* m_WVP = new WVP();
+        Camera* m_Camera = new Camera(Vector3(0.0f, 0.7f, 1.5f), Vector3(0.0f, -0.1f, 0.0f));
+        World* m_World = nullptr;
 
-        GameCube* m_GameCube = nullptr;
-        GamePlane* m_GamePlane = nullptr;
-
-        float m_RotationAngle = 0.0f;
+        float m_MoveSpeed = 2.0f;   // units per second
+        float m_RotateSpeed = XM_PI / 2.0f; // radians per second
 };
 
 EXPORT_GAME(Scratch);
