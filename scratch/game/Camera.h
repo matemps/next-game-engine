@@ -130,6 +130,12 @@ class Camera
         // setters
 
         inline void SetAspectRatio(float aspectRatio) { m_AspectRatio = aspectRatio; }
+        inline void SetPosition(Vector3 position) { m_Eye = position; }
+
+    public:
+        // getters
+
+        inline Vector3 GetPosition() const { return m_Eye; }
 
     private:
         // eye level (default: 64 units)
