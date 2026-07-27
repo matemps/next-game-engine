@@ -9,8 +9,8 @@
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 
-#include "Camera.h"
 #include "World.h"
+#include "Player.h"
 
 
 using namespace DirectX;
@@ -30,32 +30,23 @@ class Scratch : public Game
             m_World = new World();
             m_World->AddBlock(100.0f, 100.0f, 250.0f);
             m_World->AddPlane(1000.0f, 1000.0f, Matrix::CreateTranslation(0.0f, -250.0f, 0.0f));
+
+            m_Player = new Player();
         }
 
         void Update(float dt) override
         {
             Keyboard::State kbState = GetKeyboard()->GetState();
 
-            if (kbState.W) { m_Camera->MoveForward(dt); }
-            if (kbState.S) { m_Camera->MoveBackward(dt); }
-            if (kbState.A) { m_Camera->MoveLeft(dt); }
-            if (kbState.D) { m_Camera->MoveRight(dt); }
-
-            if (kbState.Space) { m_Camera->MoveUp(dt); }
-            if (kbState.LeftControl) { m_Camera->MoveDown(dt); }
-
-            if (kbState.Left) { m_Camera->RotateLeft(dt); }
-            if (kbState.Right) { m_Camera->RotateRight(dt); }
-            if (kbState.Up) { m_Camera->RotateUp(dt); }
-            if (kbState.Down) { m_Camera->RotateDown(dt); }
+            m_Player->Update(kbState, dt);
         }
 
         void Render() override
         {
             m_World->Render(
                 GetGameRenderer(),
-                m_Camera->GetViewMatrix(),
-                m_Camera->GetProjectionMatrix()
+                m_Player->GetPlayerCamera()->GetViewMatrix(),
+                m_Player->GetPlayerCamera()->GetProjectionMatrix()
             );
         }
 
@@ -76,12 +67,12 @@ class Scratch : public Game
             // TO DO: protect against a divide by zero exception
             float aspectRatio = static_cast<float>(GetWidth()) / static_cast<float>(GetHeight());
 
-            m_Camera->SetAspectRatio(aspectRatio);
+            m_Player->GetPlayerCamera()->SetAspectRatio(aspectRatio);
         }
 
     private:
-        Camera* m_Camera = new Camera();
         World* m_World = nullptr;
+        Player* m_Player = nullptr;
 };
 
 EXPORT_GAME(Scratch);

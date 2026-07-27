@@ -1,5 +1,6 @@
 add_library(scratch SHARED
     src/GameMain.cpp
+    src/Player.cpp
 )
 
 target_include_directories(scratch PUBLIC
