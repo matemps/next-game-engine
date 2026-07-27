@@ -28,7 +28,6 @@ Application::Application(Game* game) : m_Game(game)
     m_DeviceResources->CreateDeviceResources();
     CreateDeviceDependentResources();
     m_DeviceResources->CreateWindowSizeDependentResources();
-    CreateWindowSizeDependentResources();
 
     m_Window->SetTickFn([this]() { Tick(); });
     m_Window->SetOnDisplayChangeFn([this]() { OnDisplayChange(); });
@@ -54,6 +53,8 @@ Application::Application(Game* game) : m_Game(game)
     game->SetKeyboard(m_keyboard);  // set game keyboard
 
     game->Init();   // init game
+
+    CreateWindowSizeDependentResources();
 }
 
 // Executes the basic game loop.
