@@ -1,10 +1,6 @@
 #include "Player.h"
 
 
-// TO DO: Jump and Gravity Formulas
-// TO DO: Movement and Acceleration formulas
-
-
 Player::Player(b3WorldId physicsWorld, Vector3 spawnPosition) :
     m_PhysicsWorld(physicsWorld)
 {
@@ -23,7 +19,7 @@ Player::Player(b3WorldId physicsWorld, Vector3 spawnPosition) :
     b3ShapeDef shapeDef = b3DefaultShapeDef();
     shapeDef.filter.categoryBits = c_PlayerCollisionCategory;
 
-    b3CreateHullShape(m_Body, &shapeDef, &hull.base);
+    m_Shape = b3CreateHullShape(m_Body, &shapeDef, &hull.base);
 
     SyncCameraToBody();
 }
@@ -39,6 +35,12 @@ void Player::Crouch()
 
     m_EyeLevel = m_IsCrouched ? Vector3(0, 28, 0) : Vector3(0, 64, 0);
     m_MovementSpeed = m_IsCrouched ? 63.3f : 150.0f;
+
+    b3BoxHull hull = m_IsCrouched
+        ? b3MakeBoxHull(c_CrouchHalfWidth, c_CrouchHalfHeight, c_CrouchHalfDepth)
+        : b3MakeBoxHull(c_HalfWidth, c_HalfHeight, c_HalfDepth);
+
+    b3Shape_SetHull(m_Shape, &hull.base);
 }
 
 bool Player::IsGrounded()
@@ -60,8 +62,10 @@ bool Player::IsGrounded()
 
 void Player::SyncCameraToBody()
 {
+    float halfHeight = m_IsCrouched ? c_CrouchHalfHeight : c_HalfHeight;
+
     Vector3 center = ToVector3(b3Body_GetPosition(m_Body));
-    Vector3 feet = center - Vector3(0.0f, c_HalfHeight, 0.0f);
+    Vector3 feet = center - Vector3(0.0f, halfHeight, 0.0f);
 
     m_PlayerCamera->SetPosition(feet + m_EyeLevel);
 }

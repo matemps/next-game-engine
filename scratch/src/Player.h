@@ -13,8 +13,7 @@
 using namespace DirectX;
 
 
-// TO DO: Jump and Gravity Formulas
-// TO DO: Movement and Acceleration formulas
+// TO DO: Implement Hl2 player physics
 
 
 class Player
@@ -37,19 +36,29 @@ class Player
         void SyncCameraToBody();
 
     private:
-        // collision hull dimensions (width x depth, height)
+        // collision hull dimensions
         static constexpr float c_Width = 32.0f;
         static constexpr float c_Depth = 32.0f;
         static constexpr float c_Height = 72.0f;
+
+        // crouched collision hull dimensions
+        static constexpr float c_CrouchWidth = 32.0f;
+        static constexpr float c_CrouchDepth = 32.0f;
+        static constexpr float c_CrouchHeight = 36.0f;
 
         // half-extent
         static constexpr float c_HalfWidth = c_Width * 0.5f;
         static constexpr float c_HalfDepth = c_Depth * 0.5f;
         static constexpr float c_HalfHeight = c_Height * 0.5f;
 
+        static constexpr float c_CrouchHalfWidth = c_CrouchWidth * 0.5f;
+        static constexpr float c_CrouchHalfDepth = c_CrouchDepth * 0.5f;
+        static constexpr float c_CrouchHalfHeight = c_CrouchHeight * 0.5f;
+
     private:
         b3WorldId m_PhysicsWorld;
         b3BodyId m_Body;
+        b3ShapeId m_Shape;
 
         Vector3 m_EyeLevel = Vector3(0, 64, 0);
         Camera* m_PlayerCamera = new Camera();
