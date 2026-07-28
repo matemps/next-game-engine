@@ -14,7 +14,7 @@ Player::Player(b3WorldId physicsWorld, Vector3 spawnPosition) :
 
     m_Body = b3CreateBody(m_PhysicsWorld, &bodyDef);
 
-    b3BoxHull hull = b3MakeBoxHull(c_HalfWidth, c_HalfHeight, c_HalfDepth);
+    b3BoxHull hull = b3MakeBoxHull(HALF_WIDTH, HALF_HEIGHT, HALF_DEPTH);
 
     b3ShapeDef shapeDef = b3DefaultShapeDef();
     shapeDef.filter.categoryBits = c_PlayerCollisionCategory;
@@ -33,12 +33,12 @@ void Player::Crouch()
 {
     m_IsCrouched = !m_IsCrouched;
 
-    m_EyeLevel = m_IsCrouched ? Vector3(0, 28, 0) : Vector3(0, 64, 0);
-    m_MovementSpeed = m_IsCrouched ? 63.3f : 150.0f;
+    m_EyeLevel = m_IsCrouched ? EYE_LEVEL_CROUCH : EYE_LEVEL;
+    m_MovementSpeed = m_IsCrouched ? MOVEMENT_SPEED_CROUCH : MOVEMENT_SPEED;
 
     b3BoxHull hull = m_IsCrouched
-        ? b3MakeBoxHull(c_CrouchHalfWidth, c_CrouchHalfHeight, c_CrouchHalfDepth)
-        : b3MakeBoxHull(c_HalfWidth, c_HalfHeight, c_HalfDepth);
+        ? b3MakeBoxHull(HALF_WIDTH, HALF_HEIGHT_CROUCH, HALF_DEPTH)
+        : b3MakeBoxHull(HALF_WIDTH, HALF_HEIGHT, HALF_DEPTH);
 
     b3Shape_SetHull(m_Shape, &hull.base);
 }
@@ -48,12 +48,14 @@ bool Player::IsGrounded()
     b3QueryFilter filter = b3DefaultQueryFilter();
     filter.maskBits = c_StaticCollisionCategory;
 
-    // Cast a short ray from the body center down past the feet - if it hits static
+    float halfHeight = m_IsCrouched ? HALF_HEIGHT_CROUCH : HALF_HEIGHT;
+
+    // Cast a short ray from the body center down to the feet - if it hits static
     // world geometry the player is standing on something and may jump.
     b3RayResult result = b3World_CastRayClosest(
         m_PhysicsWorld,
         b3Body_GetPosition(m_Body),
-        b3Vec3{ 0.0f, -(c_HalfHeight + 2.0f), 0.0f },
+        b3Vec3{ 0.0f, -halfHeight, 0.0f },
         filter
     );
 
@@ -62,12 +64,12 @@ bool Player::IsGrounded()
 
 void Player::SyncCameraToBody()
 {
-    float halfHeight = m_IsCrouched ? c_CrouchHalfHeight : c_HalfHeight;
+    float halfHeight = m_IsCrouched ? HALF_HEIGHT_CROUCH : HALF_HEIGHT;
 
     Vector3 center = ToVector3(b3Body_GetPosition(m_Body));
     Vector3 feet = center - Vector3(0.0f, halfHeight, 0.0f);
 
-    m_PlayerCamera->SetPosition(feet + m_EyeLevel);
+    m_PlayerCamera->SetPosition(feet + Vector3(0, static_cast<float>(m_EyeLevel), 0));
 }
 
 void Player::Update(Keyboard::State kbState, float dt)
@@ -80,26 +82,12 @@ void Player::Update(Keyboard::State kbState, float dt)
     if ((kbState.LeftControl && !m_IsCrouched) 
         || (!kbState.LeftControl && m_IsCrouched)) { Crouch(); }
 
-    Vector3 forward = m_PlayerCamera->GetForward();
-    forward.y = 0.0f;
-    forward.Normalize();
+    if (kbState.W) { /* move forwards */ }
+    if (kbState.S) { /* move backwards */ }
+    if (kbState.D) { /* move right */ }
+    if (kbState.A) { /* move left */ }
 
-    Vector3 right = m_PlayerCamera->GetRight();
-
-    Vector3 moveDirection = Vector3::Zero;
-    if (kbState.W) { moveDirection += forward; }
-    if (kbState.S) { moveDirection -= forward; }
-    if (kbState.D) { moveDirection += right; }
-    if (kbState.A) { moveDirection -= right; }
-
-    if (moveDirection != Vector3::Zero) { moveDirection.Normalize(); }
-
-    Vector3 velocity = moveDirection * m_MovementSpeed;
-    velocity.y = ToVector3(b3Body_GetLinearVelocity(m_Body)).y;
-
-    if (kbState.Space && IsGrounded()) { velocity.y = m_JumpSpeed; }
-
-    b3Body_SetLinearVelocity(m_Body, ToB3Vec3(velocity));
+    if (kbState.Space && IsGrounded()) { /* jump */ }
 
     SyncCameraToBody();
 }

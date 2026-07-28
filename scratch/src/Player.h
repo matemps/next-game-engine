@@ -13,9 +13,6 @@
 using namespace DirectX;
 
 
-// TO DO: Implement Hl2 player physics
-
-
 class Player
 {
     public:
@@ -37,34 +34,33 @@ class Player
 
     private:
         // collision hull dimensions
-        static constexpr float c_Width = 32.0f;
-        static constexpr float c_Depth = 32.0f;
-        static constexpr float c_Height = 72.0f;
+        static constexpr float HULL_WIDTH = 32.0f;
+        static constexpr float HULL_DEPTH = 32.0f;
+        static constexpr float HULL_HEIGHT = 72.0f;
+        static constexpr float HULL_HEIGHT_CROUCH = 37.0f;
+        static constexpr float HALF_WIDTH = HULL_WIDTH * 0.5f;
+        static constexpr float HALF_DEPTH = HULL_DEPTH * 0.5f;
+        static constexpr float HALF_HEIGHT = HULL_HEIGHT * 0.5f;
+        static constexpr float HALF_HEIGHT_CROUCH = HULL_HEIGHT_CROUCH * 0.5f;
 
-        // crouched collision hull dimensions
-        static constexpr float c_CrouchWidth = 32.0f;
-        static constexpr float c_CrouchDepth = 32.0f;
-        static constexpr float c_CrouchHeight = 36.0f;
+        // eye position
+        static constexpr int EYE_LEVEL = 64;
+        static constexpr int EYE_LEVEL_CROUCH = 28;
 
-        // half-extent
-        static constexpr float c_HalfWidth = c_Width * 0.5f;
-        static constexpr float c_HalfDepth = c_Depth * 0.5f;
-        static constexpr float c_HalfHeight = c_Height * 0.5f;
-
-        static constexpr float c_CrouchHalfWidth = c_CrouchWidth * 0.5f;
-        static constexpr float c_CrouchHalfDepth = c_CrouchDepth * 0.5f;
-        static constexpr float c_CrouchHalfHeight = c_CrouchHeight * 0.5f;
+        // movement speed
+        static constexpr float MOVEMENT_SPEED = 150.0f;
+        static constexpr float MOVEMENT_SPEED_CROUCH = 63.3f;
 
     private:
         b3WorldId m_PhysicsWorld;
         b3BodyId m_Body;
         b3ShapeId m_Shape;
 
-        Vector3 m_EyeLevel = Vector3(0, 64, 0);
         Camera* m_PlayerCamera = new Camera();
+        
+        int m_EyeLevel = EYE_LEVEL;
 
         float m_MovementSpeed = 150.0f;
-        float m_JumpSpeed = 500.0f;
 
         bool m_IsCrouched = false;
 };
