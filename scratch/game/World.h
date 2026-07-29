@@ -18,6 +18,8 @@ using namespace DirectX::SimpleMath;
 constexpr uint64_t c_StaticCollisionCategory = 0x1;
 constexpr uint64_t c_PlayerCollisionCategory = 0x2;
 
+constexpr float GRAVITY = 600.0f;
+
 // TO DO: moves these utility functions to a separate header file.
 
 inline b3Vec3 ToB3Vec3(const Vector3& v) { return b3Vec3{ v.x, v.y, v.z }; }
@@ -50,7 +52,7 @@ class World
             b3SetLengthUnitsPerMeter(c_InchesPerMeter);
 
             b3WorldDef worldDef = b3DefaultWorldDef();
-            worldDef.gravity = b3Vec3{ 0.0f, -1600.0f, 0.0f };
+            worldDef.gravity = b3Vec3{ 0.0f, -GRAVITY, 0.0f };
 
             m_PhysicsWorld = b3CreateWorld(&worldDef);
         }
