@@ -58,6 +58,7 @@ class Player
         // movement speed
         static constexpr float MOVEMENT_SPEED_WALK = 150.0f;
         static constexpr float MOVEMENT_SPEED_CROUCH = 63.3f;
+        static constexpr float MOVEMENT_SPEED_MAX = 320.0f;
 
         // jump height
 
@@ -83,7 +84,7 @@ class Player
 
         float m_EyeLevel = EYE_LEVEL;
 
-        float m_MovementSpeed = MOVEMENT_SPEED_WALK;
+        float m_WishSpeed = MOVEMENT_SPEED_WALK;
 
         bool m_IsCrouched = false;
 };

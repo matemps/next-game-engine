@@ -63,7 +63,7 @@ void Player::Crouch()
     m_IsCrouched = !m_IsCrouched;
 
     m_EyeLevel = m_IsCrouched ? EYE_LEVEL_CROUCH : EYE_LEVEL;
-    m_MovementSpeed = m_IsCrouched ? MOVEMENT_SPEED_CROUCH : MOVEMENT_SPEED_WALK;
+    m_WishSpeed = m_IsCrouched ? MOVEMENT_SPEED_CROUCH : MOVEMENT_SPEED_WALK;
 
     b3BoxHull hull = m_IsCrouched
         ? b3MakeBoxHull(HALF_WIDTH, HALF_HEIGHT_CROUCH, HALF_DEPTH)
@@ -118,7 +118,51 @@ void Player::Update(Keyboard::State kbState, float dt)
     if ((kbState.LeftControl && !m_IsCrouched) 
         || (!kbState.LeftControl && m_IsCrouched)) { Crouch(); }
 
-    if (kbState.W) { /* move forwards */ }
+    if (kbState.W)
+    {
+        constexpr float FRICTION = 4.0f;
+        constexpr float STOP_SPEED = 100.0f;
+        constexpr float ACCELERATE = 10.0f;
+
+        Vector3 velocity = ToVector3(b3Body_GetLinearVelocity(m_Body));
+
+        float speed = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+
+        if (speed >= 0.001f)
+        {
+            // Prevent the player from sliding forever at low speeds.
+            float control = (speed > STOP_SPEED) ? speed : STOP_SPEED;
+
+            // Amount of speed to remove this frame.
+            float drop = control * FRICTION * dt;
+
+            float newSpeed = (0.0f > (speed - drop)) ? 0.0f : (speed - drop);
+
+            // Scale the horizontal velocity.
+            newSpeed /= speed;
+
+            velocity.x *= newSpeed;
+            velocity.z *= newSpeed;
+        }
+
+        Vector3 forward = m_PlayerCamera->GetForward();
+        forward.y = 0.0f;   // ground movement ignores pitch
+        forward.Normalize();
+        Vector3 wishDir = forward;
+
+        float currentSpeed = velocity.Dot(wishDir);
+        float addSpeed = m_WishSpeed - currentSpeed;
+
+        if (addSpeed > 0.0f)
+        {
+            float accelSpeed = ACCELERATE * dt * MOVEMENT_SPEED_MAX;
+            accelSpeed = (accelSpeed < addSpeed) ? accelSpeed : addSpeed;
+            velocity += wishDir * accelSpeed;
+        }
+
+        b3Body_SetLinearVelocity(m_Body, ToB3Vec3(velocity));
+    }
+
     if (kbState.S) { /* move backwards */ }
     if (kbState.D) { /* move right */ }
     if (kbState.A) { /* move left */ }
