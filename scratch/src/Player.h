@@ -62,23 +62,25 @@ class Player
         static constexpr float MOVEMENT_SPEED_CROUCH = 63.3f;
         static constexpr float MOVEMENT_SPEED_MAX = 320.0f;
 
-        // jump height
-
-        // crouching
+        // jump height - crouching
         static constexpr float CROUCHING_JUMP_HEIGHT = 21.0f;
         
-        // standing
+        // jump height - standing
         static constexpr float STANDING_JUMP_HEIGHT = 20.0f;
         static constexpr float STANDING_JUMP_CROUCH_HEIGHT = 56.0f;
 
-        // walking
+        // jump height - walking
         static constexpr float WALKING_JUMP_HEIGHT = 20.0f;
         static constexpr float WALKING_JUMP_CROUCH_HEIGHT = 56.0f;
 
-        // other
+        // ground
         static constexpr float FRICTION = 4.0f;
         static constexpr float STOP_SPEED = 100.0f;
-        static constexpr float ACCELERATE = 10.0f;
+        static constexpr float GROUND_ACCELERATE = 10.0f;
+
+        // air control
+        static constexpr float AIR_ACCELERATE = 10.0f;
+        static constexpr float AIR_SPEED_CAP = 30.0f;
 
     private:
         b3WorldId m_PhysicsWorld;

@@ -98,16 +98,6 @@ bool Player::IsGrounded()
     return result.hit;
 }
 
-void Player::SyncCameraToBody()
-{
-    float halfHeight = m_IsCrouched ? HALF_HEIGHT_CROUCH : HALF_HEIGHT;
-
-    Vector3 center = ToVector3(b3Body_GetPosition(m_Body));
-    Vector3 feet = center - Vector3(0.0f, halfHeight, 0.0f);
-
-    m_PlayerCamera->SetPosition(feet + Vector3(0.0f, m_EyeLevel, 0.0f));
-}
-
 void Player::ApplyFriction(Vector3& velocity, float dt)
 {
     float speed = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
@@ -136,14 +126,16 @@ void Player::HandleMovement(Keyboard::State kbState, float dt)
     if (kbState.Left) { m_PlayerCamera->RotateLeft(dt); }
     if (kbState.Right) { m_PlayerCamera->RotateRight(dt); }
 
+    bool grounded = IsGrounded();
+
     if (kbState.W || kbState.A || kbState.S || kbState.D)
     {
         Vector3 forward = m_PlayerCamera->GetForward();
-        forward.y = 0.0f;   // ground movement ignores pitch
+        forward.y = 0.0f;   // ignore pitch
         forward.Normalize();
 
         Vector3 right = m_PlayerCamera->GetRight();
-        right.y = 0.0f;
+        right.y = 0.0f;     // ignore pitch
         right.Normalize();
 
         Vector3 wishDir = Vector3::Zero;
@@ -155,14 +147,17 @@ void Player::HandleMovement(Keyboard::State kbState, float dt)
 
         Vector3 velocity = ToVector3(b3Body_GetLinearVelocity(m_Body));
 
-        ApplyFriction(velocity, dt);
+        if (grounded) { ApplyFriction(velocity, dt); }
+
+        float wishSpeed = grounded ? m_WishSpeed : (AIR_SPEED_CAP < m_WishSpeed ? AIR_SPEED_CAP : m_WishSpeed);
 
         float currentSpeed = velocity.Dot(wishDir);
-        float addSpeed = m_WishSpeed - currentSpeed;
+        float addSpeed = wishSpeed - currentSpeed;
 
         if (addSpeed > 0.0f)
         {
-            float accelSpeed = ACCELERATE * dt * MOVEMENT_SPEED_MAX;
+            float accelerate = grounded ? GROUND_ACCELERATE : AIR_ACCELERATE;
+            float accelSpeed = accelerate * dt * MOVEMENT_SPEED_MAX;
             accelSpeed = (accelSpeed < addSpeed) ? accelSpeed : addSpeed;
             velocity += wishDir * accelSpeed;
         }
@@ -170,10 +165,20 @@ void Player::HandleMovement(Keyboard::State kbState, float dt)
         b3Body_SetLinearVelocity(m_Body, ToB3Vec3(velocity));
     }
 
-    if (kbState.Space && IsGrounded()) { Jump(); }
+    if (kbState.Space && grounded) { Jump(); }
 
     if ((kbState.LeftControl && !m_IsCrouched) 
         || (!kbState.LeftControl && m_IsCrouched)) { Crouch(); }
+}
+
+void Player::SyncCameraToBody()
+{
+    float halfHeight = m_IsCrouched ? HALF_HEIGHT_CROUCH : HALF_HEIGHT;
+
+    Vector3 center = ToVector3(b3Body_GetPosition(m_Body));
+    Vector3 feet = center - Vector3(0.0f, halfHeight, 0.0f);
+
+    m_PlayerCamera->SetPosition(feet + Vector3(0.0f, m_EyeLevel, 0.0f));
 }
 
 void Player::Update(Keyboard::State kbState, float dt)
