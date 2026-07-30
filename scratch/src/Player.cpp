@@ -118,11 +118,26 @@ void Player::Update(Keyboard::State kbState, float dt)
     if ((kbState.LeftControl && !m_IsCrouched) 
         || (!kbState.LeftControl && m_IsCrouched)) { Crouch(); }
 
-    if (kbState.W)
+    if (kbState.W || kbState.S || kbState.D || kbState.A)
     {
         constexpr float FRICTION = 4.0f;
         constexpr float STOP_SPEED = 100.0f;
         constexpr float ACCELERATE = 10.0f;
+
+        Vector3 forward = m_PlayerCamera->GetForward();
+        forward.y = 0.0f;   // ground movement ignores pitch
+        forward.Normalize();
+
+        Vector3 right = m_PlayerCamera->GetRight();
+        right.y = 0.0f;
+        right.Normalize();
+
+        Vector3 wishDir = Vector3::Zero;
+        if (kbState.W) { wishDir += forward; }
+        if (kbState.S) { wishDir -= forward; }
+        if (kbState.D) { wishDir += right; }
+        if (kbState.A) { wishDir -= right; }
+        if (wishDir.LengthSquared() > 0.0f) { wishDir.Normalize(); }
 
         Vector3 velocity = ToVector3(b3Body_GetLinearVelocity(m_Body));
 
@@ -145,11 +160,6 @@ void Player::Update(Keyboard::State kbState, float dt)
             velocity.z *= newSpeed;
         }
 
-        Vector3 forward = m_PlayerCamera->GetForward();
-        forward.y = 0.0f;   // ground movement ignores pitch
-        forward.Normalize();
-        Vector3 wishDir = forward;
-
         float currentSpeed = velocity.Dot(wishDir);
         float addSpeed = m_WishSpeed - currentSpeed;
 
@@ -162,10 +172,6 @@ void Player::Update(Keyboard::State kbState, float dt)
 
         b3Body_SetLinearVelocity(m_Body, ToB3Vec3(velocity));
     }
-
-    if (kbState.S) { /* move backwards */ }
-    if (kbState.D) { /* move right */ }
-    if (kbState.A) { /* move left */ }
 
     if (kbState.Space && IsGrounded()) { Jump(); }
 
