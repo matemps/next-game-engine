@@ -21,6 +21,9 @@ Player::Player(b3WorldId physicsWorld, Vector3 spawnPosition) :
     b3ShapeDef shapeDef = b3DefaultShapeDef();
     shapeDef.filter.categoryBits = c_PlayerCollisionCategory;
 
+    // Friction is handled by ApplyFriction.
+    shapeDef.baseMaterial.friction = 0.0f;
+
     m_Shape = b3CreateHullShape(m_Body, &shapeDef, &hull.base);
 
     SyncCameraToBody();
@@ -31,52 +34,12 @@ Player::~Player()
     delete m_PlayerCamera;
 }
 
-float Player::CalculateJumpHeight()
+void Player::RotateCamera(Keyboard::State kbState, float dt)
 {
-    switch (m_PlayerState)
-    {
-        case Crouching:
-            return CROUCHING_JUMP_HEIGHT;
-        case Standing:
-            return (m_IsCrouched)
-                ? STANDING_JUMP_CROUCH_HEIGHT
-                : STANDING_JUMP_HEIGHT;
-        case Walking:
-            return (m_IsCrouched)
-                ? WALKING_JUMP_CROUCH_HEIGHT
-                : WALKING_JUMP_HEIGHT;
-    }
-}
-
-void Player::Jump()
-{
-    float jumpHeight = CalculateJumpHeight();
-    b3Vec3 velocity = b3Body_GetLinearVelocity(m_Body);
-
-    velocity.y = sqrt(2 * GRAVITY * jumpHeight);
-
-    b3Body_SetLinearVelocity(m_Body, velocity);
-}
-
-void Player::Crouch()
-{
-    m_IsCrouched = !m_IsCrouched;
-
-    m_EyeLevel = m_IsCrouched ? EYE_LEVEL_CROUCH : EYE_LEVEL;
-    m_WishSpeed = m_IsCrouched ? MOVEMENT_SPEED_CROUCH : MOVEMENT_SPEED_WALK;
-
-    b3BoxHull hull = m_IsCrouched
-        ? b3MakeBoxHull(HALF_WIDTH, HALF_HEIGHT_CROUCH, HALF_DEPTH)
-        : b3MakeBoxHull(HALF_WIDTH, HALF_HEIGHT, HALF_DEPTH);
-
-    b3Shape_SetHull(m_Shape, &hull.base);
-
-    b3Vec3 velocity = b3Body_GetLinearVelocity(m_Body);
-    m_PlayerState = m_IsCrouched
-        ? Crouching
-        : (velocity.x == 0.0f && velocity.z == 0.0f)
-            ? Standing
-            : Walking;
+    if (kbState.Up) { m_PlayerCamera->RotateUp(dt); }
+    if (kbState.Down) { m_PlayerCamera->RotateDown(dt); }
+    if (kbState.Left) { m_PlayerCamera->RotateLeft(dt); }
+    if (kbState.Right) { m_PlayerCamera->RotateRight(dt); }
 }
 
 bool Player::IsGrounded()
@@ -119,14 +82,71 @@ void Player::ApplyFriction(Vector3& velocity, float dt)
     velocity.z *= newSpeed;
 }
 
+void Player::Jump(Vector3& velocity)
+{
+    float jumpHeight = 0.0f;
+
+    switch (m_PlayerState)
+    {
+        case Crouching:
+            jumpHeight = CROUCHING_JUMP_HEIGHT;
+            break;
+        case Standing:
+            jumpHeight = (m_IsCrouched)
+                ? STANDING_JUMP_CROUCH_HEIGHT
+                : STANDING_JUMP_HEIGHT;
+            break;
+        case Walking:
+            jumpHeight = (m_IsCrouched)
+                ? WALKING_JUMP_CROUCH_HEIGHT
+                : WALKING_JUMP_HEIGHT;
+            break;
+    }
+
+    velocity.y = sqrt(2 * GRAVITY * jumpHeight);
+}
+
+void Player::Crouch()
+{
+    m_IsCrouched = !m_IsCrouched;
+
+    m_EyeLevel = m_IsCrouched ? EYE_LEVEL_CROUCH : EYE_LEVEL;
+    m_WishSpeed = m_IsCrouched ? MOVEMENT_SPEED_CROUCH : MOVEMENT_SPEED_WALK;
+
+    b3BoxHull hull = m_IsCrouched
+        ? b3MakeBoxHull(HALF_WIDTH, HALF_HEIGHT_CROUCH, HALF_DEPTH)
+        : b3MakeBoxHull(HALF_WIDTH, HALF_HEIGHT, HALF_DEPTH);
+
+    b3Shape_SetHull(m_Shape, &hull.base);
+}
+
+void Player::SyncCameraToBody()
+{
+    float halfHeight = m_IsCrouched ? HALF_HEIGHT_CROUCH : HALF_HEIGHT;
+
+    Vector3 center = ToVector3(b3Body_GetPosition(m_Body));
+    Vector3 feet = center - Vector3(0.0f, halfHeight, 0.0f);
+
+    m_PlayerCamera->SetPosition(feet + Vector3(0.0f, m_EyeLevel, 0.0f));
+}
+
+void Player::SetPlayerState()
+{
+    Vector3 velocity = ToVector3(b3Body_GetLinearVelocity(m_Body));
+
+    m_PlayerState = m_IsCrouched
+        ? Crouching
+        : (velocity.x == 0.0f && velocity.z == 0.0f)
+            ? Standing
+            : Walking;
+}
+
 void Player::HandleMovement(Keyboard::State kbState, float dt)
 {
-    if (kbState.Up) { m_PlayerCamera->RotateUp(dt); }
-    if (kbState.Down) { m_PlayerCamera->RotateDown(dt); }
-    if (kbState.Left) { m_PlayerCamera->RotateLeft(dt); }
-    if (kbState.Right) { m_PlayerCamera->RotateRight(dt); }
-
+    Vector3 velocity = ToVector3(b3Body_GetLinearVelocity(m_Body));
     bool grounded = IsGrounded();
+    
+    if (grounded) { ApplyFriction(velocity, dt); }
 
     if (kbState.W || kbState.A || kbState.S || kbState.D)
     {
@@ -145,12 +165,7 @@ void Player::HandleMovement(Keyboard::State kbState, float dt)
         if (kbState.A) { wishDir -= right; }
         if (wishDir.LengthSquared() > 0.0f) { wishDir.Normalize(); }
 
-        Vector3 velocity = ToVector3(b3Body_GetLinearVelocity(m_Body));
-
-        if (grounded) { ApplyFriction(velocity, dt); }
-
         float wishSpeed = grounded ? m_WishSpeed : (AIR_SPEED_CAP < m_WishSpeed ? AIR_SPEED_CAP : m_WishSpeed);
-
         float currentSpeed = velocity.Dot(wishDir);
         float addSpeed = wishSpeed - currentSpeed;
 
@@ -161,28 +176,22 @@ void Player::HandleMovement(Keyboard::State kbState, float dt)
             accelSpeed = (accelSpeed < addSpeed) ? accelSpeed : addSpeed;
             velocity += wishDir * accelSpeed;
         }
-
-        b3Body_SetLinearVelocity(m_Body, ToB3Vec3(velocity));
     }
 
-    if (kbState.Space && grounded) { Jump(); }
+    if (kbState.Space && grounded) { Jump(velocity); }
 
     if ((kbState.LeftControl && !m_IsCrouched) 
         || (!kbState.LeftControl && m_IsCrouched)) { Crouch(); }
-}
 
-void Player::SyncCameraToBody()
-{
-    float halfHeight = m_IsCrouched ? HALF_HEIGHT_CROUCH : HALF_HEIGHT;
-
-    Vector3 center = ToVector3(b3Body_GetPosition(m_Body));
-    Vector3 feet = center - Vector3(0.0f, halfHeight, 0.0f);
-
-    m_PlayerCamera->SetPosition(feet + Vector3(0.0f, m_EyeLevel, 0.0f));
+    
+    
+    b3Body_SetLinearVelocity(m_Body, ToB3Vec3(velocity));
+    SyncCameraToBody();
+    SetPlayerState();
 }
 
 void Player::Update(Keyboard::State kbState, float dt)
 {
+    RotateCamera(kbState, dt);
     HandleMovement(kbState, dt);
-    SyncCameraToBody();
 }

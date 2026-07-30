@@ -26,13 +26,14 @@ class Player
         inline Camera* GetPlayerCamera() { return m_PlayerCamera; }
 
     private:
-        void ApplyFriction(Vector3& velocity, float dt);
-        void HandleMovement(Keyboard::State kbState, float dt);
-        float CalculateJumpHeight();
-        void Jump();
-        void Crouch();
+        void RotateCamera(Keyboard::State kbState, float dt);
         bool IsGrounded();
+        void ApplyFriction(Vector3& velocity, float dt);
+        void Jump(Vector3& velocity);
+        void Crouch();
         void SyncCameraToBody();
+        void SetPlayerState();
+        void HandleMovement(Keyboard::State kbState, float dt);
 
     private:
         enum PlayerState
