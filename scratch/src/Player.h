@@ -26,6 +26,8 @@ class Player
         inline Camera* GetPlayerCamera() { return m_PlayerCamera; }
 
     private:
+        void ApplyFriction(Vector3& velocity, float dt);
+        void HandleMovement(Keyboard::State kbState, float dt);
         float CalculateJumpHeight();
         void Jump();
         void Crouch();
@@ -72,6 +74,11 @@ class Player
         // walking
         static constexpr float WALKING_JUMP_HEIGHT = 20.0f;
         static constexpr float WALKING_JUMP_CROUCH_HEIGHT = 56.0f;
+
+        // other
+        static constexpr float FRICTION = 4.0f;
+        static constexpr float STOP_SPEED = 100.0f;
+        static constexpr float ACCELERATE = 10.0f;
 
     private:
         b3WorldId m_PhysicsWorld;

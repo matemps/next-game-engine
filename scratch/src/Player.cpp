@@ -108,22 +108,36 @@ void Player::SyncCameraToBody()
     m_PlayerCamera->SetPosition(feet + Vector3(0.0f, m_EyeLevel, 0.0f));
 }
 
-void Player::Update(Keyboard::State kbState, float dt)
+void Player::ApplyFriction(Vector3& velocity, float dt)
 {
-    if (kbState.Left) { m_PlayerCamera->RotateLeft(dt); }
-    if (kbState.Right) { m_PlayerCamera->RotateRight(dt); }
+    float speed = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+
+    if (speed < 0.001f) return;
+
+    // Prevent the player from sliding forever at low speeds.
+    float control = (speed > STOP_SPEED) ? speed : STOP_SPEED;
+
+    // Amount of speed to remove this frame.
+    float drop = control * FRICTION * dt;
+
+    float newSpeed = (0.0f > (speed - drop)) ? 0.0f : (speed - drop);
+
+    // Scale the horizontal velocity.
+    newSpeed /= speed;
+
+    velocity.x *= newSpeed;
+    velocity.z *= newSpeed;
+}
+
+void Player::HandleMovement(Keyboard::State kbState, float dt)
+{
     if (kbState.Up) { m_PlayerCamera->RotateUp(dt); }
     if (kbState.Down) { m_PlayerCamera->RotateDown(dt); }
+    if (kbState.Left) { m_PlayerCamera->RotateLeft(dt); }
+    if (kbState.Right) { m_PlayerCamera->RotateRight(dt); }
 
-    if ((kbState.LeftControl && !m_IsCrouched) 
-        || (!kbState.LeftControl && m_IsCrouched)) { Crouch(); }
-
-    if (kbState.W || kbState.S || kbState.D || kbState.A)
+    if (kbState.W || kbState.A || kbState.S || kbState.D)
     {
-        constexpr float FRICTION = 4.0f;
-        constexpr float STOP_SPEED = 100.0f;
-        constexpr float ACCELERATE = 10.0f;
-
         Vector3 forward = m_PlayerCamera->GetForward();
         forward.y = 0.0f;   // ground movement ignores pitch
         forward.Normalize();
@@ -141,24 +155,7 @@ void Player::Update(Keyboard::State kbState, float dt)
 
         Vector3 velocity = ToVector3(b3Body_GetLinearVelocity(m_Body));
 
-        float speed = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
-
-        if (speed >= 0.001f)
-        {
-            // Prevent the player from sliding forever at low speeds.
-            float control = (speed > STOP_SPEED) ? speed : STOP_SPEED;
-
-            // Amount of speed to remove this frame.
-            float drop = control * FRICTION * dt;
-
-            float newSpeed = (0.0f > (speed - drop)) ? 0.0f : (speed - drop);
-
-            // Scale the horizontal velocity.
-            newSpeed /= speed;
-
-            velocity.x *= newSpeed;
-            velocity.z *= newSpeed;
-        }
+        ApplyFriction(velocity, dt);
 
         float currentSpeed = velocity.Dot(wishDir);
         float addSpeed = m_WishSpeed - currentSpeed;
@@ -175,5 +172,12 @@ void Player::Update(Keyboard::State kbState, float dt)
 
     if (kbState.Space && IsGrounded()) { Jump(); }
 
+    if ((kbState.LeftControl && !m_IsCrouched) 
+        || (!kbState.LeftControl && m_IsCrouched)) { Crouch(); }
+}
+
+void Player::Update(Keyboard::State kbState, float dt)
+{
+    HandleMovement(kbState, dt);
     SyncCameraToBody();
 }
