@@ -50,9 +50,9 @@ class Player
         static constexpr float MAX_SPEED = 320.0f;
 
         // per-direction input speeds
-        static constexpr float FORWARD_SPEED = 200.0f;
-        static constexpr float BACK_SPEED = 200.0f;
-        static constexpr float SIDE_SPEED = 350.0f;
+        static constexpr float FORWARD_SPEED = 320.0f;
+        static constexpr float BACK_SPEED = 320.0f;
+        static constexpr float SIDE_SPEED = 320.0f;
 
         // jump velocity
         static constexpr float JUMP_VELOCITY = 270.0f;

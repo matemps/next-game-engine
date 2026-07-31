@@ -85,7 +85,12 @@ void Player::ApplyFriction(Vector3& velocity, float dt)
 {
     float speed = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
 
-    if (speed < 0.001f) return;
+    if (speed < 0.001f)
+    {
+        velocity.x = 0.0f;
+        velocity.z = 0.0f;
+        return;
+    }
 
     // Prevent the player from sliding forever at low speeds.
     float control = (speed > STOP_SPEED) ? speed : STOP_SPEED;
@@ -93,11 +98,13 @@ void Player::ApplyFriction(Vector3& velocity, float dt)
     // Amount of speed to remove this frame.
     float drop = control * FRICTION * dt;
 
-    float newSpeed = speed - drop;
-    if (newSpeed < 0) newSpeed = 0;
+    float frictionScale = (speed - drop) / speed;
 
-    velocity.x *= newSpeed / speed;
-    velocity.z *= newSpeed / speed;
+    // Friction must not invert velocity.
+    if (frictionScale < 0.0f) { frictionScale = 0.0f; }
+
+    velocity.x *= frictionScale;
+    velocity.z *= frictionScale;
 }
 
 void Player::Jump(Vector3& velocity)
@@ -120,51 +127,61 @@ void Player::HandleMovement(Keyboard::State kbState, float dt)
     
     if (grounded) { ApplyFriction(velocity, dt); }
 
-    if (kbState.W || kbState.A || kbState.S || kbState.D)
+    Vector3 forward = m_PlayerCamera->GetForward();
+    forward.y = 0.0f;   // ignore pitch
+    forward.Normalize();
+
+    Vector3 right = m_PlayerCamera->GetRight();
+    right.y = 0.0f;     // ignore pitch
+    right.Normalize();
+
+    float forwardInput = 0.0f;
+    if (kbState.W) { forwardInput += 1.0f; }
+    if (kbState.S) { forwardInput -= 1.0f; }
+
+    float sideInput = 0.0f;
+    if (kbState.D) { sideInput += 1.0f; }
+    if (kbState.A) { sideInput -= 1.0f; }
+
+    Vector3 wishDir = forward * forwardInput + right * sideInput;
+    float inputLength = wishDir.Length();
+    
+    if (inputLength > 0.0f) { wishDir /= inputLength; }
+
+    float wishSpeed = 0.0f;
+    if (forwardInput != 0.0f && sideInput != 0.0f)
     {
-        Vector3 forward = m_PlayerCamera->GetForward();
-        forward.y = 0.0f;   // ignore pitch
-        forward.Normalize();
+        wishSpeed = (FORWARD_SPEED + SIDE_SPEED) * 0.5f;
+    }
+    else if (forwardInput != 0.0f)
+    {
+        wishSpeed = (forwardInput > 0.0f) ? FORWARD_SPEED : BACK_SPEED;
+    }
+    else if (sideInput != 0.0f)
+    {
+        wishSpeed = SIDE_SPEED;
+    }
 
-        Vector3 right = m_PlayerCamera->GetRight();
-        right.y = 0.0f;     // ignore pitch
-        right.Normalize();
+    if (wishSpeed > MAX_SPEED) { wishSpeed = MAX_SPEED; }
 
-        // Forward/back/strafe are summed unnormalized, so a diagonal wish vector skews toward
-        // whichever input is stronger rather than splitting evenly between the two.
-        float forwardMove = 0.0f;
-        if (kbState.W) { forwardMove += FORWARD_SPEED; }
-        if (kbState.S) { forwardMove -= BACK_SPEED; }
+    float accelWishSpeed = grounded ? wishSpeed : (AIR_SPEED_CAP < wishSpeed ? AIR_SPEED_CAP : wishSpeed);
+    float currentSpeed = velocity.Dot(wishDir);
+    float addSpeed = accelWishSpeed - currentSpeed;
 
-        float sideMove = 0.0f;
-        if (kbState.D) { sideMove += SIDE_SPEED; }
-        if (kbState.A) { sideMove -= SIDE_SPEED; }
+    if (addSpeed > 0.0f)
+    {
+        float accelerate = grounded ? GROUND_ACCELERATE : AIR_ACCELERATE;
 
-        Vector3 wishVel = forward * forwardMove + right * sideMove;
-        Vector3 wishDir = wishVel;
-        float wishSpeed = wishDir.Length();
-        if (wishSpeed > 0.0f) { wishDir /= wishSpeed; }
+        float accelSpeed = accelerate * dt * accelWishSpeed;
+        if (accelSpeed > addSpeed) { accelSpeed = addSpeed; }
 
-        if (wishSpeed > MAX_SPEED) { wishSpeed = MAX_SPEED; }
-
-        float accelWishSpeed = grounded ? wishSpeed : (AIR_SPEED_CAP < wishSpeed ? AIR_SPEED_CAP : wishSpeed);
-        float currentSpeed = velocity.Dot(wishDir);
-        float addSpeed = accelWishSpeed - currentSpeed;
-
-        if (addSpeed > 0.0f)
-        {
-            float accelerate = grounded ? GROUND_ACCELERATE : AIR_ACCELERATE;
-            float accelSpeed = accelerate * dt * wishSpeed;
-            accelSpeed = (accelSpeed < addSpeed) ? accelSpeed : addSpeed;
-            velocity += wishDir * accelSpeed;
-        }
+        velocity += wishDir * accelSpeed;
     }
 
     if (kbState.Space && !m_JumpHeld && grounded) { Jump(velocity); }
     m_JumpHeld = kbState.Space;
 
     velocity.x = std::clamp(velocity.x, -MAX_VELOCITY, MAX_VELOCITY);
-    velocity.y = std::clamp(velocity.y, -MAX_VELOCITY, MAX_VELOCITY);
     velocity.z = std::clamp(velocity.z, -MAX_VELOCITY, MAX_VELOCITY);
 
     b3Body_SetLinearVelocity(m_Body, ToB3Vec3(velocity));
