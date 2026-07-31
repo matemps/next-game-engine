@@ -29,6 +29,8 @@ class Scratch : public Game
 
             m_World = new World();
             m_World->AddBlock(100.0f, 100.0f, 250.0f);
+            m_World->AddBlock(100, 400, 10, Matrix::CreateTranslation(-450.0f, -240.0f, -250.0f));
+            m_World->AddBlock(18, 18, 18, Matrix::CreateTranslation(-180.0f, -232.0f, 250.0f));
             m_World->AddPlane(1000.0f, 1000.0f, Matrix::CreateTranslation(0.0f, -250.0f, 0.0f));
 
             m_Player = new Player(m_World->GetPhysicsWorld(), Vector3(0.0f, 400.0f, 0.0f));
