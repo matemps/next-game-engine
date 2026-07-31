@@ -30,9 +30,6 @@ class Player
         bool IsGrounded();
         void ApplyFriction(Vector3& velocity, float dt);
         void Jump(Vector3& velocity);
-        void Crouch(bool grounded);
-        void UpdateEyeLevel(float dt);
-        void UpdateCameraFeetOffset(float dt);
         void SyncCameraToBody();
         void HandleMovement(Keyboard::State kbState, float dt);
         void Teleport(Vector3 position);
@@ -41,41 +38,30 @@ class Player
         // collision hull dimensions
         static constexpr float HULL_WIDTH = 32.0f;
         static constexpr float HULL_DEPTH = 32.0f;
-        static constexpr float HULL_HEIGHT = 72.0f;
-        static constexpr float HULL_HEIGHT_CROUCH = 37.0f;
+        static constexpr float HULL_HEIGHT = 56.0f;
         static constexpr float HALF_WIDTH = HULL_WIDTH * 0.5f;
         static constexpr float HALF_DEPTH = HULL_DEPTH * 0.5f;
         static constexpr float HALF_HEIGHT = HULL_HEIGHT * 0.5f;
-        static constexpr float HALF_HEIGHT_CROUCH = HULL_HEIGHT_CROUCH * 0.5f;
 
-        // eye position
-        static constexpr float EYE_LEVEL = 64.0f;
-        static constexpr float EYE_LEVEL_CROUCH = 28.0f;
-        static constexpr float EYE_LEVEL_TRANSITION_SPEED = 400.0f;
+        // eye level
+        static constexpr float EYE_LEVEL = 46.0f;
 
         // movement speed
-        static constexpr float MOVEMENT_SPEED_WALK = 150.0f;
-        static constexpr float MOVEMENT_SPEED_CROUCH = 63.3f;
-        static constexpr float MOVEMENT_SPEED_MAX = 320.0f;
+        static constexpr float MOVEMENT_SPEED = 320.0f;
 
-        // jump height - crouching
-        static constexpr float CROUCHING_JUMP_HEIGHT = 21.0f;
-
-        // jump height - standing
-        static constexpr float STANDING_JUMP_HEIGHT = 20.0f;
-
-        // jump height - walking
-        static constexpr float WALKING_JUMP_HEIGHT = 20.0f;
+        // jump velocity
+        static constexpr float JUMP_VELOCITY = 270.0f;
 
         // ground
         static constexpr float FRICTION = 4.0f;
         static constexpr float STOP_SPEED = 100.0f;
-        static constexpr float GROUND_ACCELERATE = 10.0f;
-        static constexpr float GROUND_CHECK_SKIN = 2.0f; // how far above/below the feet to probe for ground
+        static constexpr float GROUND_CHECK_DISTANCE = 2.0f;
 
-        // air control
-        static constexpr float AIR_ACCELERATE = 10.0f;
-        static constexpr float AIR_SPEED_CAP = 30.0f;
+        // accelerate
+        static constexpr float ACCELERATE = 10.0f;
+
+        // velocity clamp
+        static constexpr float MAX_VELOCITY = 2000.0f;
 
     private:
         b3WorldId m_PhysicsWorld;
@@ -86,15 +72,5 @@ class Player
 
         Camera* m_PlayerCamera = new Camera();
 
-        float m_EyeLevel = EYE_LEVEL;
-        float m_TargetEyeLevel = EYE_LEVEL;
-
-        // Cosmetic-only correction so the camera eases through the instant
-        // feet lift caused by ducking mid-air.
-        float m_CameraFeetOffset = 0.0f;
-
-        float m_WishSpeed = MOVEMENT_SPEED_WALK;
-
-        bool m_IsCrouched = false;
         bool m_JumpHeld = false;
 };

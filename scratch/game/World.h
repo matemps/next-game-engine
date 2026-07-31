@@ -18,7 +18,7 @@ using namespace DirectX::SimpleMath;
 constexpr uint64_t c_StaticCollisionCategory = 0x1;
 constexpr uint64_t c_PlayerCollisionCategory = 0x2;
 
-constexpr float GRAVITY = 600.0f;
+constexpr float GRAVITY = 800.0f;
 
 // TO DO: moves these utility functions to a separate header file.
 
