@@ -109,7 +109,7 @@ void Player::ApplyFriction(Vector3& velocity, float dt)
 
 void Player::Jump(Vector3& velocity)
 {
-    velocity.y = JUMP_VELOCITY;
+    velocity.y += JUMP_VELOCITY;
 }
 
 void Player::SyncCameraToBody()
@@ -164,15 +164,15 @@ void Player::HandleMovement(Keyboard::State kbState, float dt)
 
     if (wishSpeed > MAX_SPEED) { wishSpeed = MAX_SPEED; }
 
-    float accelWishSpeed = grounded ? wishSpeed : (AIR_SPEED_CAP < wishSpeed ? AIR_SPEED_CAP : wishSpeed);
+    float accelTargetSpeed = grounded ? wishSpeed : (AIR_SPEED_CAP < wishSpeed ? AIR_SPEED_CAP : wishSpeed);
     float currentSpeed = velocity.Dot(wishDir);
-    float addSpeed = accelWishSpeed - currentSpeed;
+    float addSpeed = accelTargetSpeed - currentSpeed;
 
     if (addSpeed > 0.0f)
     {
         float accelerate = grounded ? GROUND_ACCELERATE : AIR_ACCELERATE;
 
-        float accelSpeed = accelerate * dt * accelWishSpeed;
+        float accelSpeed = accelerate * dt * wishSpeed;
         if (accelSpeed > addSpeed) { accelSpeed = addSpeed; }
 
         velocity += wishDir * accelSpeed;
