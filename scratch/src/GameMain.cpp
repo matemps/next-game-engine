@@ -36,7 +36,7 @@ class Scratch : public Game
             m_World->AddBlock(56, 56, 56, Matrix::CreateTranslation(200.0f, -97.0f, -200.0f));
             m_World->AddPlane(1000.0f, 1000.0f, Matrix::CreateTranslation(0.0f, -125.0f, 0.0f));
 
-            m_Player = new Player(m_World->GetPhysicsWorld(), Vector3(0.0f, 400.0f, 0.0f));
+            m_Player = new Player(m_World->GetPhysicsWorld(), Vector3(0.0f, 200.0f, 0.0f));
         }
 
         void Update(float dt) override
