@@ -6,8 +6,8 @@ using Microsoft::WRL::ComPtr;
 
 void ::Plane::Create(const GamePlane* plane, ID3D11Device* device)
 {
-    const float l = plane->m_Length;
-    const float w = plane->m_Width;
+    const float l = plane->m_Length / 2.0f;
+    const float w = plane->m_Width / 2.0f;
 
     Vertex vertices[] =
     {

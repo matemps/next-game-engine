@@ -76,7 +76,9 @@ class World
             m_Blocks.push_back({ new GameBlock(length, width, height), transform });
 
             b3BodyId body = CreateStaticBody(transform);
-            b3BoxHull hull = b3MakeBoxHull(length, height, width);
+
+            // b3MakeBoxHull takes half-extents
+            b3BoxHull hull = b3MakeBoxHull(length/2, height/2, width/2);
 
             b3ShapeDef shapeDef = b3DefaultShapeDef();
             shapeDef.filter.categoryBits = c_StaticCollisionCategory;
@@ -94,7 +96,9 @@ class World
             // hull is offset downward to give it some solid thickness while keeping its top
             // face flush with the visible surface.
             constexpr float halfThickness = 5.0f;
-            b3BoxHull hull = b3MakeOffsetBoxHull(length, halfThickness, width, b3Vec3{ 0.0f, -halfThickness, 0.0f });
+
+            // b3MakeBoxHull takes half-extents
+            b3BoxHull hull = b3MakeOffsetBoxHull(length/2, halfThickness, width/2, b3Vec3{ 0.0f, -halfThickness, 0.0f });
 
             b3ShapeDef shapeDef = b3DefaultShapeDef();
             shapeDef.filter.categoryBits = c_StaticCollisionCategory;

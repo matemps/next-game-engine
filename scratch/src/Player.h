@@ -30,20 +30,13 @@ class Player
         bool IsGrounded();
         void ApplyFriction(Vector3& velocity, float dt);
         void Jump(Vector3& velocity);
-        void Crouch();
+        void Crouch(bool grounded);
+        void UpdateEyeLevel(float dt);
+        void UpdateCameraFeetOffset(float dt);
         void SyncCameraToBody();
-        void SetPlayerState();
         void HandleMovement(Keyboard::State kbState, float dt);
         void Teleport(Vector3 position);
 
-    private:
-        enum PlayerState
-        {
-            Crouching,
-            Standing,
-            Walking
-        };
-    
     private:
         // collision hull dimensions
         static constexpr float HULL_WIDTH = 32.0f;
@@ -58,6 +51,7 @@ class Player
         // eye position
         static constexpr float EYE_LEVEL = 64.0f;
         static constexpr float EYE_LEVEL_CROUCH = 28.0f;
+        static constexpr float EYE_LEVEL_TRANSITION_SPEED = 400.0f;
 
         // movement speed
         static constexpr float MOVEMENT_SPEED_WALK = 150.0f;
@@ -66,19 +60,18 @@ class Player
 
         // jump height - crouching
         static constexpr float CROUCHING_JUMP_HEIGHT = 21.0f;
-        
+
         // jump height - standing
         static constexpr float STANDING_JUMP_HEIGHT = 20.0f;
-        static constexpr float STANDING_JUMP_CROUCH_HEIGHT = 56.0f;
 
         // jump height - walking
         static constexpr float WALKING_JUMP_HEIGHT = 20.0f;
-        static constexpr float WALKING_JUMP_CROUCH_HEIGHT = 56.0f;
 
         // ground
         static constexpr float FRICTION = 4.0f;
         static constexpr float STOP_SPEED = 100.0f;
         static constexpr float GROUND_ACCELERATE = 10.0f;
+        static constexpr float GROUND_CHECK_SKIN = 2.0f; // how far above/below the feet to probe for ground
 
         // air control
         static constexpr float AIR_ACCELERATE = 10.0f;
@@ -93,11 +86,15 @@ class Player
 
         Camera* m_PlayerCamera = new Camera();
 
-        PlayerState m_PlayerState = Standing;
-
         float m_EyeLevel = EYE_LEVEL;
+        float m_TargetEyeLevel = EYE_LEVEL;
+
+        // Cosmetic-only correction so the camera eases through the instant
+        // feet lift caused by ducking mid-air.
+        float m_CameraFeetOffset = 0.0f;
 
         float m_WishSpeed = MOVEMENT_SPEED_WALK;
 
         bool m_IsCrouched = false;
+        bool m_JumpHeld = false;
 };

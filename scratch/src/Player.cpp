@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 
 #include "Player.h"
 
@@ -43,6 +44,15 @@ void Player::RotateCamera(Keyboard::State kbState, float dt)
     if (kbState.Right) { m_PlayerCamera->RotateRight(dt); }
 }
 
+namespace
+{
+    bool OnGroundOverlap(b3ShapeId, void* context)
+    {
+        *static_cast<bool*>(context) = true;
+        return false; // stop at the first hit
+    }
+}
+
 bool Player::IsGrounded()
 {
     b3QueryFilter filter = b3DefaultQueryFilter();
@@ -51,27 +61,31 @@ bool Player::IsGrounded()
     float halfHeight = m_IsCrouched ? HALF_HEIGHT_CROUCH : HALF_HEIGHT;
     Vector3 center = ToVector3(b3Body_GetPosition(m_Body));
 
-    // Cast short rays from four corners of the hull down to the feet.
-    Vector3 offsets[] = {
-        Vector3(HALF_WIDTH, 0.0f, HALF_DEPTH),
-        Vector3(HALF_WIDTH, 0.0f, -HALF_DEPTH),
-        Vector3(-HALF_WIDTH, 0.0f, HALF_DEPTH),
-        Vector3(-HALF_WIDTH, 0.0f, -HALF_DEPTH),
+    float insetWidth = HALF_WIDTH - GROUND_CHECK_SKIN;
+    float insetDepth = HALF_DEPTH - GROUND_CHECK_SKIN;
+    float yLower = -halfHeight - GROUND_CHECK_SKIN;
+    float yUpper = -halfHeight + GROUND_CHECK_SKIN;
+
+    b3Vec3 points[8] = {
+        { -insetWidth, yLower, -insetDepth },
+        {  insetWidth, yLower, -insetDepth },
+        { -insetWidth, yLower,  insetDepth },
+        {  insetWidth, yLower,  insetDepth },
+        { -insetWidth, yUpper, -insetDepth },
+        {  insetWidth, yUpper, -insetDepth },
+        { -insetWidth, yUpper,  insetDepth },
+        {  insetWidth, yUpper,  insetDepth },
     };
 
-    for (const Vector3& offset : offsets)
-    {
-        b3RayResult result = b3World_CastRayClosest(
-            m_PhysicsWorld,
-            ToB3Vec3(center + offset),
-            b3Vec3{ 0.0f, -halfHeight, 0.0f },
-            filter
-        );
+    b3ShapeProxy proxy;
+    proxy.points = points;
+    proxy.count = 8;
+    proxy.radius = 0.0f;
 
-        if (result.hit) { return true; }
-    }
+    bool grounded = false;
+    b3World_OverlapShape(m_PhysicsWorld, b3ToPos(ToB3Vec3(center)), &proxy, filter, OnGroundOverlap, &grounded);
 
-    return false;
+    return grounded;
 }
 
 void Player::ApplyFriction(Vector3& velocity, float dt)
@@ -97,40 +111,60 @@ void Player::ApplyFriction(Vector3& velocity, float dt)
 
 void Player::Jump(Vector3& velocity)
 {
-    float jumpHeight = 0.0f;
+    bool isMoving = velocity.x != 0.0f || velocity.z != 0.0f;
 
-    switch (m_PlayerState)
-    {
-        case Crouching:
-            jumpHeight = CROUCHING_JUMP_HEIGHT;
-            break;
-        case Standing:
-            jumpHeight = (m_IsCrouched)
-                ? STANDING_JUMP_CROUCH_HEIGHT
-                : STANDING_JUMP_HEIGHT;
-            break;
-        case Walking:
-            jumpHeight = (m_IsCrouched)
-                ? WALKING_JUMP_CROUCH_HEIGHT
-                : WALKING_JUMP_HEIGHT;
-            break;
-    }
+    float jumpHeight = m_IsCrouched
+        ? CROUCHING_JUMP_HEIGHT
+        : (isMoving ? WALKING_JUMP_HEIGHT : STANDING_JUMP_HEIGHT);
 
     velocity.y = sqrt(2 * GRAVITY * jumpHeight);
 }
 
-void Player::Crouch()
+void Player::Crouch(bool grounded)
 {
+    float oldHalfHeight = m_IsCrouched ? HALF_HEIGHT_CROUCH : HALF_HEIGHT;
+
     m_IsCrouched = !m_IsCrouched;
 
-    m_EyeLevel = m_IsCrouched ? EYE_LEVEL_CROUCH : EYE_LEVEL;
+    m_TargetEyeLevel = m_IsCrouched ? EYE_LEVEL_CROUCH : EYE_LEVEL;
     m_WishSpeed = m_IsCrouched ? MOVEMENT_SPEED_CROUCH : MOVEMENT_SPEED_WALK;
+
+    float newHalfHeight = m_IsCrouched ? HALF_HEIGHT_CROUCH : HALF_HEIGHT;
 
     b3BoxHull hull = m_IsCrouched
         ? b3MakeBoxHull(HALF_WIDTH, HALF_HEIGHT_CROUCH, HALF_DEPTH)
         : b3MakeBoxHull(HALF_WIDTH, HALF_HEIGHT, HALF_DEPTH);
 
     b3Shape_SetHull(m_Shape, &hull.base);
+
+    if (grounded)
+    {
+        Vector3 position = ToVector3(b3Body_GetPosition(m_Body));
+        position.y += newHalfHeight - oldHalfHeight;
+        b3Body_SetTransform(m_Body, ToB3Vec3(position), b3Quat_identity);
+    }
+    else
+    {
+        m_CameraFeetOffset -= oldHalfHeight - newHalfHeight;
+    }
+}
+
+void Player::UpdateEyeLevel(float dt)
+{
+    float diff = m_TargetEyeLevel - m_EyeLevel;
+    float step = EYE_LEVEL_TRANSITION_SPEED * dt;
+
+    m_EyeLevel += (fabs(diff) <= step) ? diff : copysign(step, diff);
+}
+
+void Player::UpdateCameraFeetOffset(float dt)
+{
+    float step = EYE_LEVEL_TRANSITION_SPEED * dt;
+    std::cout << step << std::endl;
+
+    m_CameraFeetOffset = (fabs(m_CameraFeetOffset) <= step)
+        ? 0.0f
+        : m_CameraFeetOffset - copysign(step, m_CameraFeetOffset);
 }
 
 void Player::SyncCameraToBody()
@@ -138,20 +172,9 @@ void Player::SyncCameraToBody()
     float halfHeight = m_IsCrouched ? HALF_HEIGHT_CROUCH : HALF_HEIGHT;
 
     Vector3 center = ToVector3(b3Body_GetPosition(m_Body));
-    Vector3 feet = center - Vector3(0.0f, halfHeight, 0.0f);
+    Vector3 feet = center - Vector3(0.0f, halfHeight, 0.0f) + Vector3(0.0f, m_CameraFeetOffset, 0.0f);
 
     m_PlayerCamera->SetPosition(feet + Vector3(0.0f, m_EyeLevel, 0.0f));
-}
-
-void Player::SetPlayerState()
-{
-    Vector3 velocity = ToVector3(b3Body_GetLinearVelocity(m_Body));
-
-    m_PlayerState = m_IsCrouched
-        ? Crouching
-        : (velocity.x == 0.0f && velocity.z == 0.0f)
-            ? Standing
-            : Walking;
 }
 
 void Player::HandleMovement(Keyboard::State kbState, float dt)
@@ -191,22 +214,25 @@ void Player::HandleMovement(Keyboard::State kbState, float dt)
         }
     }
 
-    if (kbState.Space && grounded) { Jump(velocity); }
+    if ((kbState.LeftControl && !m_IsCrouched)
+        || (!kbState.LeftControl && m_IsCrouched)) { Crouch(grounded); }
 
-    if ((kbState.LeftControl && !m_IsCrouched) 
-        || (!kbState.LeftControl && m_IsCrouched)) { Crouch(); }
+    if (kbState.Space && !m_JumpHeld && grounded) { Jump(velocity); }
+    m_JumpHeld = kbState.Space;
 
-    
-    
     b3Body_SetLinearVelocity(m_Body, ToB3Vec3(velocity));
+    UpdateEyeLevel(dt);
+    UpdateCameraFeetOffset(dt);
     SyncCameraToBody();
-    SetPlayerState();
 }
 
 void Player::Teleport(Vector3 position)
 {
     b3Body_SetTransform(m_Body, ToB3Vec3(position), b3Quat_identity);
     b3Body_SetLinearVelocity(m_Body, b3Vec3{ 0.0f, 0.0f, 0.0f });
+
+    m_EyeLevel = m_TargetEyeLevel; // snap, don't blend across a teleport
+    m_CameraFeetOffset = 0.0f;
     SyncCameraToBody();
 }
 

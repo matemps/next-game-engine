@@ -6,9 +6,9 @@ using Microsoft::WRL::ComPtr;
 
 void Block::Create(const GameBlock* block, ID3D11Device* device)
 {
-    const float l = block->m_Length;
-    const float w = block->m_Width;
-    const float h = block->m_Height;
+    const float l = block->m_Length / 2.0f;
+    const float w = block->m_Width / 2.0f;
+    const float h = block->m_Height / 2.0f;
 
     Vertex vertices[] =
     {
