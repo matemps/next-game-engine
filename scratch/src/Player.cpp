@@ -130,19 +130,31 @@ void Player::HandleMovement(Keyboard::State kbState, float dt)
         right.y = 0.0f;     // ignore pitch
         right.Normalize();
 
-        Vector3 wishDir = Vector3::Zero;
-        if (kbState.W) { wishDir += forward; }
-        if (kbState.S) { wishDir -= forward; }
-        if (kbState.D) { wishDir += right; }
-        if (kbState.A) { wishDir -= right; }
-        if (wishDir.LengthSquared() > 0.0f) { wishDir.Normalize(); }
+        // Forward/back/strafe are summed unnormalized, so a diagonal wish vector skews toward
+        // whichever input is stronger rather than splitting evenly between the two.
+        float forwardMove = 0.0f;
+        if (kbState.W) { forwardMove += FORWARD_SPEED; }
+        if (kbState.S) { forwardMove -= BACK_SPEED; }
 
+        float sideMove = 0.0f;
+        if (kbState.D) { sideMove += SIDE_SPEED; }
+        if (kbState.A) { sideMove -= SIDE_SPEED; }
+
+        Vector3 wishVel = forward * forwardMove + right * sideMove;
+        Vector3 wishDir = wishVel;
+        float wishSpeed = wishDir.Length();
+        if (wishSpeed > 0.0f) { wishDir /= wishSpeed; }
+
+        if (wishSpeed > MAX_SPEED) { wishSpeed = MAX_SPEED; }
+
+        float accelWishSpeed = grounded ? wishSpeed : (AIR_SPEED_CAP < wishSpeed ? AIR_SPEED_CAP : wishSpeed);
         float currentSpeed = velocity.Dot(wishDir);
-        float addSpeed = MOVEMENT_SPEED - currentSpeed;
+        float addSpeed = accelWishSpeed - currentSpeed;
 
         if (addSpeed > 0.0f)
         {
-            float accelSpeed = ACCELERATE * dt * MOVEMENT_SPEED;
+            float accelerate = grounded ? GROUND_ACCELERATE : AIR_ACCELERATE;
+            float accelSpeed = accelerate * dt * wishSpeed;
             accelSpeed = (accelSpeed < addSpeed) ? accelSpeed : addSpeed;
             velocity += wishDir * accelSpeed;
         }

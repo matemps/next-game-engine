@@ -46,8 +46,13 @@ class Player
         // eye level
         static constexpr float EYE_LEVEL = 46.0f;
 
-        // movement speed
-        static constexpr float MOVEMENT_SPEED = 320.0f;
+        // movement speed cap
+        static constexpr float MAX_SPEED = 320.0f;
+
+        // per-direction input speeds
+        static constexpr float FORWARD_SPEED = 200.0f;
+        static constexpr float BACK_SPEED = 200.0f;
+        static constexpr float SIDE_SPEED = 350.0f;
 
         // jump velocity
         static constexpr float JUMP_VELOCITY = 270.0f;
@@ -56,9 +61,11 @@ class Player
         static constexpr float FRICTION = 4.0f;
         static constexpr float STOP_SPEED = 100.0f;
         static constexpr float GROUND_CHECK_DISTANCE = 2.0f;
+        static constexpr float GROUND_ACCELERATE = 10.0f;
 
-        // accelerate
-        static constexpr float ACCELERATE = 10.0f;
+        // air control
+        static constexpr float AIR_ACCELERATE = 10.0f;
+        static constexpr float AIR_SPEED_CAP = 30.0f;
 
         // velocity clamp
         static constexpr float MAX_VELOCITY = 2000.0f;
