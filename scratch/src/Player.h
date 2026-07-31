@@ -34,6 +34,7 @@ class Player
         void SyncCameraToBody();
         void SetPlayerState();
         void HandleMovement(Keyboard::State kbState, float dt);
+        void Teleport(Vector3 position);
 
     private:
         enum PlayerState
@@ -87,6 +88,8 @@ class Player
         b3WorldId m_PhysicsWorld;
         b3BodyId m_Body;
         b3ShapeId m_Shape;
+
+        Vector3 m_SpawnPosition;
 
         Camera* m_PlayerCamera = new Camera();
 

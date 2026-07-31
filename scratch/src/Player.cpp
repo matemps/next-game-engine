@@ -4,7 +4,8 @@
 
 
 Player::Player(b3WorldId physicsWorld, Vector3 spawnPosition) :
-    m_PhysicsWorld(physicsWorld)
+    m_PhysicsWorld(physicsWorld),
+    m_SpawnPosition(spawnPosition)
 {
     b3BodyDef bodyDef = b3DefaultBodyDef();
     bodyDef.type = b3_dynamicBody;
@@ -48,17 +49,29 @@ bool Player::IsGrounded()
     filter.maskBits = c_StaticCollisionCategory;
 
     float halfHeight = m_IsCrouched ? HALF_HEIGHT_CROUCH : HALF_HEIGHT;
+    Vector3 center = ToVector3(b3Body_GetPosition(m_Body));
 
-    // Cast a short ray from the body center down to the feet - if it hits static
-    // world geometry the player is standing on something and may jump.
-    b3RayResult result = b3World_CastRayClosest(
-        m_PhysicsWorld,
-        b3Body_GetPosition(m_Body),
-        b3Vec3{ 0.0f, -halfHeight, 0.0f },
-        filter
-    );
+    // Cast short rays from four corners of the hull down to the feet.
+    Vector3 offsets[] = {
+        Vector3(HALF_WIDTH, 0.0f, HALF_DEPTH),
+        Vector3(HALF_WIDTH, 0.0f, -HALF_DEPTH),
+        Vector3(-HALF_WIDTH, 0.0f, HALF_DEPTH),
+        Vector3(-HALF_WIDTH, 0.0f, -HALF_DEPTH),
+    };
 
-    return result.hit;
+    for (const Vector3& offset : offsets)
+    {
+        b3RayResult result = b3World_CastRayClosest(
+            m_PhysicsWorld,
+            ToB3Vec3(center + offset),
+            b3Vec3{ 0.0f, -halfHeight, 0.0f },
+            filter
+        );
+
+        if (result.hit) { return true; }
+    }
+
+    return false;
 }
 
 void Player::ApplyFriction(Vector3& velocity, float dt)
@@ -190,8 +203,17 @@ void Player::HandleMovement(Keyboard::State kbState, float dt)
     SetPlayerState();
 }
 
+void Player::Teleport(Vector3 position)
+{
+    b3Body_SetTransform(m_Body, ToB3Vec3(position), b3Quat_identity);
+    b3Body_SetLinearVelocity(m_Body, b3Vec3{ 0.0f, 0.0f, 0.0f });
+    SyncCameraToBody();
+}
+
 void Player::Update(Keyboard::State kbState, float dt)
 {
     RotateCamera(kbState, dt);
     HandleMovement(kbState, dt);
+
+    if (kbState.R) { Teleport(m_SpawnPosition); } // teleport player to starting position
 }
