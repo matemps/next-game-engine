@@ -10,8 +10,7 @@
 #include <DirectXColors.h>
 
 #include "World.h"
-#include "Player.h"
-
+#include "Camera.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -27,32 +26,39 @@ class Scratch : public Game
         {
             std::cout << "Game initialized." << std::endl;
 
-            m_World = new World();
-            m_World->AddBlock(100.0f, 100.0f, 250.0f);
-            m_World->AddBlock(100, 400, 10, Matrix::CreateTranslation(-450.0f, -120.0f, -250.0f));
-            m_World->AddBlock(18, 18, 18, Matrix::CreateTranslation(-180.0f, -116.0f, 250.0f));
-            m_World->AddBlock(16, 64, 64, Matrix::CreateTranslation(200.0f, -93.0f, 200.0f));
-            m_World->AddBlock(16, 32, 72, Matrix::CreateTranslation(200.0f, -89.0f, 248.0f));
-            m_World->AddBlock(56, 56, 56, Matrix::CreateTranslation(200.0f, -97.0f, -200.0f));
-            m_World->AddPlane(1000.0f, 1000.0f, Matrix::CreateTranslation(0.0f, -125.0f, 0.0f));
-
-            m_Player = new Player(m_World->GetPhysicsWorld(), Vector3(0.0f, 200.0f, 0.0f));
+            m_World.AddBlock(100.0f, 100.0f, 250.0f);
+            m_World.AddBlock(100, 400, 10, Matrix::CreateTranslation(-450.0f, -120.0f, -250.0f));
+            m_World.AddBlock(18, 18, 18, Matrix::CreateTranslation(-180.0f, -116.0f, 250.0f));
+            m_World.AddBlock(16, 64, 64, Matrix::CreateTranslation(200.0f, -93.0f, 200.0f));
+            m_World.AddBlock(16, 32, 72, Matrix::CreateTranslation(200.0f, -89.0f, 248.0f));
+            m_World.AddBlock(56, 56, 56, Matrix::CreateTranslation(200.0f, -97.0f, -200.0f));
+            m_World.AddPlane(1000.0f, 1000.0f, Matrix::CreateTranslation(0.0f, -125.0f, 0.0f));
         }
 
         void Update(float dt) override
         {
             Keyboard::State kbState = GetKeyboard()->GetState();
 
-            m_Player->Update(kbState, dt);
-            m_World->Step(dt);
+            if (kbState.Up) { m_Camera.RotateUp(dt); }
+            if (kbState.Down) { m_Camera.RotateDown(dt); }
+            if (kbState.Left) { m_Camera.RotateLeft(dt); }
+            if (kbState.Right) { m_Camera.RotateRight(dt); }
+
+            if (kbState.W) { m_Camera.MoveForward(dt); }
+            if (kbState.S) { m_Camera.MoveBackward(dt); }
+            if (kbState.A) { m_Camera.MoveLeft(dt); }
+            if (kbState.D) { m_Camera.MoveRight(dt); }
+
+            if (kbState.Space) { m_Camera.MoveUp(dt); }
+            if (kbState.LeftControl) { m_Camera.MoveDown(dt); }
         }
 
         void Render() override
         {
-            m_World->Render(
+            m_World.Render(
                 GetGameRenderer(),
-                m_Player->GetPlayerCamera()->GetViewMatrix(),
-                m_Player->GetPlayerCamera()->GetProjectionMatrix()
+                m_Camera.GetViewMatrix(),
+                m_Camera.GetProjectionMatrix()
             );
         }
 
@@ -73,12 +79,12 @@ class Scratch : public Game
             // TO DO: protect against a divide by zero exception
             float aspectRatio = static_cast<float>(GetWidth()) / static_cast<float>(GetHeight());
 
-            m_Player->GetPlayerCamera()->SetAspectRatio(aspectRatio);
+            m_Camera.SetAspectRatio(aspectRatio);
         }
 
     private:
-        World* m_World = nullptr;
-        Player* m_Player = nullptr;
+        World m_World = World();
+        Camera m_Camera = Camera();
 };
 
 EXPORT_GAME(Scratch);
